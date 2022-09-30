@@ -1,0 +1,31 @@
+{
+    "async": {
+        "prefix": ["async","Async"],
+        "body": [
+            "Async ${1}() {",
+            "    return ${0:this->async_return()};",
+            "}",
+        ],
+        "description": "Async",
+        "scope": "cpp"
+    },
+    "AsyncRoutine": {
+        "prefix": ["routine"],
+        "body": [
+            "class Async${1:Foo} : public AsyncRoutine {",
+            "    typedef AsyncRoutine BaseType;",
+            "public:",
+            "    Async${1:Foo}& operator ()() {",
+            "        async_start(&Async${1:Foo}::${0:foo});",
+            "        return *this;",
+            "    }",
+            "",
+            "    Async ${0:foo}() {",
+            "        return async_return();",
+            "    }",
+            "};"
+        ],
+        "description": "AsyncRoutine",
+        "scope": "cpp"
+    }
+}

@@ -1,0 +1,78 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "dev-san",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ENABLE_SANITIZER": "ON"
+            }
+        },
+        {
+            "name": "dev",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ENABLE_SANITIZER": "OFF"
+            }
+        },
+        {
+            "name": "dev-gcc",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ENABLE_SANITIZER": "OFF"
+            }
+        },
+        {
+            "name": "dev-gcov",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ENABLE_SANITIZER": "OFF",
+                "ENABLE_GCOV": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ENABLE_SANITIZER": "OFF",
+                "LIBEVENT_STATIC_LINK": "ON",
+                "OPENSSL_USE_STATIC_LIBS": "ON",
+                "CMAKE_CXX_VISIBILITY_PRESET": "hidden"
+            }
+        },
+        {
+            "name": "release-width-debug-info",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "RelwithDebInfo",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ENABLE_SANITIZER": "OFF",
+                "LIBEVENT_STATIC_LINK": "ON",
+                "OPENSSL_USE_STATIC_LIBS": "ON",
+                "CMAKE_CXX_VISIBILITY_PRESET": "hidden"
+            }
+        }
+    ]
+}
