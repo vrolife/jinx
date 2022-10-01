@@ -33,7 +33,7 @@ int main(int argc, const char* argv[])
     jinx_assert(list.size() == 3);
 
     int idx = 0;
-    list.for_each_access_only([&](mynode* node) {
+    list.for_each([&](mynode* node) {
         jinx_assert(node->_i == idx);
         ++idx;
     });

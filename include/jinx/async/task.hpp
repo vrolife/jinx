@@ -447,7 +447,7 @@ protected:
             error::error("Exit from a running task");
         }
 
-        _tasks_all.for_each_prefetch([this](Task* task){
+        _tasks_all.for_each([this](Task* task){
             auto ptr = TaskPtr::shared_from_this(task);
             TaskQueue::cancel(ptr) >> JINX_IGNORE_RESULT;
         });

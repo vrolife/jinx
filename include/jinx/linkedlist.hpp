@@ -120,22 +120,13 @@ struct LinkedList {
     }
 
     void clear() noexcept {
-        for_each_prefetch([this](T* ptr){
+        for_each([this](T* ptr){
             erase(ptr) >> JINX_IGNORE_RESULT;
         });
     }
 
     template<typename F>
-    void for_each_access_only(F&& fun) {
-        auto* ptr = _head;
-        while (ptr != &_end) {
-            fun(static_cast<T*>(ptr));
-            ptr = ptr->_next;
-        }
-    }
-
-    template<typename F>
-    void for_each_prefetch(F&& fun) {
+    void for_each(F&& fun) {
         auto* ptr = _head;
         while (ptr != &_end) {
             auto* next = ptr->_next;
