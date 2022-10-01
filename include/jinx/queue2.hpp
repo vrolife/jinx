@@ -42,8 +42,8 @@ class Queue2 : private detail::QueueBase<Container>
     typedef detail::QueueBase<Container> BaseType;
 
 public:
-    class GetNode;
-    class PutNode;
+    class CallbackGet;
+    class CallbackPut;
 
     class Get;
     class Put;
@@ -53,8 +53,8 @@ private:
     friend class Get;
     friend class Put;
 
-    LinkedList<GetNode> _pending_get;
-    LinkedList<PutNode> _pending_put;
+    LinkedList<CallbackGet> _pending_get;
+    LinkedList<CallbackPut> _pending_put;
 
 public:
     using BaseType::QueueBase;
@@ -71,23 +71,25 @@ public:
     }
 
     void reset() noexcept {
-        for (auto& get : _pending_get) {
-            get.cancel_get();
-        }
+        _pending_get.for_each([](CallbackGet* node){
+            node->queue2_cancel_pending_get();
+        });
         _pending_get.clear();
-        for (auto& put : _pending_put) {
-            put.cancel_put();
-        }
+
+        _pending_put.for_each([](CallbackPut* node){
+            node->queue2_cancel_pending_put();
+        });
         _pending_put.clear();
+
         BaseType::reset();
     }
 
     JINX_NO_DISCARD
-    Result<Queue2Status> get(GetNode* node) {
+    Result<Queue2Status> get(CallbackGet* node) {
         if (empty()) {
             if (not _pending_put.empty()) {
                 auto* put = this->_pending_put.back();
-                node->queue_get(put->queue_put());
+                node->queue2_get(put->queue2_put());
                 this->_pending_put.pop_back() >> JINX_IGNORE_RESULT;
                 return Queue2Status::Complete;
             }
@@ -98,23 +100,23 @@ public:
             return Queue2Status::Pending;
         }
 
-        node->queue_get(std::move(front()));
+        node->queue2_get(std::move(front()));
         pop();
         return Queue2Status::Complete;
     }
 
     JINX_NO_DISCARD
-    Result<Queue2Status> put(PutNode* node) {
+    Result<Queue2Status> put(CallbackPut* node) {
         while (not _pending_get.empty())
         {
             auto* get = this->_pending_get.back();
             this->_pending_get.pop_back() >> JINX_IGNORE_RESULT;
             if (empty()) {
-                get->queue_get(node->queue_put());
+                get->queue2_get(node->queue2_put());
                 return Queue2Status::Complete;
             }
         
-            get->queue_get(std::move(front()));
+            get->queue2_get(std::move(front()));
             pop();
         }
         if (full()) {
@@ -123,37 +125,37 @@ public:
             }
             return Queue2Status::Pending;
         }
-        emplace(node->queue_put());
+        emplace(node->queue2_put());
         return Queue2Status::Complete;
     }
 };
 
 template<typename Container>
-class Queue2<Container>::GetNode : public  LinkedList<GetNode>::Node
+class Queue2<Container>::CallbackGet : public  LinkedList<CallbackGet>::Node
 {
     friend Queue2<Container>;
     typedef typename Container::value_type ValueType;
 protected:
-    virtual void queue_get(ValueType&& value) = 0;
-    virtual void cancel_get() = 0;
+    virtual void queue2_get(ValueType&& value) = 0;
+    virtual void queue2_cancel_pending_get() = 0;
 };
 
 template<typename Container>
-class Queue2<Container>::PutNode : public  LinkedList<PutNode>::Node
+class Queue2<Container>::CallbackPut : public  LinkedList<CallbackPut>::Node
 {
     friend Queue2<Container>;
     typedef typename Container::value_type ValueType;
 protected:
-    virtual ValueType queue_put() = 0;
-    virtual void cancel_put() = 0;
+    virtual ValueType queue2_put() = 0;
+    virtual void queue2_cancel_pending_put() = 0;
 };
 
 template<typename Container>
 class Queue2<Container>::Get
 : public AsyncFuture<typename Container::value_type>,
-  private GetNode
+  private CallbackGet
 {
-    friend class LinkedList<GetNode>;
+    friend class LinkedList<CallbackGet>;
     typedef typename Container::value_type ValueType;
     typedef Queue2<Container> Queue2Type;
     Queue2<Container>* _queue{nullptr};
@@ -167,11 +169,11 @@ protected:
         AsyncFuture<ValueType>::async_finalize();
     }
 
-    void queue_get(ValueType&& value) override {
+    void queue2_get(ValueType&& value) override {
         this->emplace_result(std::move(value)) >> JINX_IGNORE_RESULT;
     }
 
-    void cancel_get() override {
+    void queue2_cancel_pending_get() override {
         this->set_error(make_error(
             ErrorAwaitable::Cancelled));
     }
@@ -206,10 +208,10 @@ public:
 template<typename Container>
 class Queue2<Container>::Put
 : public AsyncFuture<void>,
-  private PutNode
+  private CallbackPut
 {
     
-    friend class LinkedList<PutNode>;
+    friend class LinkedList<CallbackPut>;
     friend class Queue2<Container>::Get;
 
     typedef typename Container::value_type ValueType;
@@ -228,12 +230,12 @@ protected:
         AsyncFuture<void>::async_finalize();
     }
 
-    ValueType queue_put() override {
+    ValueType queue2_put() override {
         this->emplace_result() >> JINX_IGNORE_RESULT;
         return std::move(_value.release());
     }
 
-    void cancel_put() override {
+    void queue2_cancel_pending_put() override {
         this->set_error(make_error(ErrorAwaitable::Cancelled));
     }
 

@@ -9,7 +9,7 @@ using namespace jinx;
 
 int sum{0};
 
-struct NonJinxInterface : Queue2<std::queue<int>>::GetNode, Queue2<std::queue<int>>::PutNode
+struct NonJinxInterface : Queue2<std::queue<int>>::CallbackGet, Queue2<std::queue<int>>::CallbackPut
 {
     Queue2<std::queue<int>> *_queue{nullptr};
 
@@ -19,23 +19,23 @@ struct NonJinxInterface : Queue2<std::queue<int>>::GetNode, Queue2<std::queue<in
     NonJinxInterface() = default;
     explicit NonJinxInterface(Queue2<std::queue<int>>* queue) :_queue(queue) { }
 
-    void queue_get(int&& value) override {
+    void queue2_get(int&& value) override {
         _value = value;
         if (_cb) {
             _cb();
         }
     }
 
-    void cancel_get() override { }
+    void queue2_cancel_pending_get() override { }
 
-    int queue_put() override {
+    int queue2_put() override {
         if (_cb) {
             _cb();
         }
         return _value;
     }
 
-    void cancel_put() override { }
+    void queue2_cancel_pending_put() override { }
 
     bool read() {
         return _queue->get(this).unwrap() == Queue2Status::Complete;
@@ -89,6 +89,11 @@ public:
         return *this;
     }
 
+protected:
+    void async_finalize() noexcept override {
+        _queue->reset();
+        return AsyncRoutine::async_finalize();
+    }
     Async _yield() {
         return async_yield(&AsyncTest2::get_all);
     }
