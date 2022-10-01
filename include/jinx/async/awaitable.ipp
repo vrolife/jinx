@@ -116,7 +116,9 @@ Async Awaitable::async_throw(const error::Error& error) noexcept
         but the derived class treats the result as an error and throws the error.
         So, restore the pointer `_top` to handle error.
     */
-    _task->_top = this;
+    if (JINX_LIKELY(_task != nullptr)) {
+        _task->_top = this;
+    }
 
     if (error.value() == 0) {
         this->_error = make_error(ErrorAwaitable::InvalidErrorCode);

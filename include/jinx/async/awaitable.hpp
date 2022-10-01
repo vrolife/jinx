@@ -207,7 +207,6 @@ protected:
     JINX_NO_DISCARD
     Async async_yield() noexcept;
 
-    JINX_NO_DISCARD
     Async async_throw(const error::Error& error) noexcept;
 
     template<typename T, typename =decltype(make_error(std::declval<T>()))>
