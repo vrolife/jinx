@@ -68,22 +68,30 @@ enum class ControlState : int {
     Exited = 24,
 };
 
-enum class ErrorAwaitable : std::size_t {
+enum class ErrorAwaitable {
     NoError,
     Uninitialized,
     Cancelled,
     Popped,
-    RaiseErrorCodeWithZero,
+    
+    /*
+        Throw error with zero
+    */
+    InvalidErrorCode,
     NoSys,
     CXXException,
     ExitLoop,
     InternalError
 };
 
-enum class ErrorCancel : std::size_t {
+enum class ErrorCancel {
     NoError,
     CancelRunningTask,
     CancelDequeuedTask,
+
+    /*
+        The task is ready. It will be canceled in the next loop
+    */
     DeferredDequeue
 };
 
@@ -140,6 +148,8 @@ class Awaitable {
 
     Awaitable* _caller{nullptr};
 
+    error::Error _error{};
+
 private:
     Async run();
 
@@ -174,6 +184,7 @@ protected:
     // do not call async_finalize() in destructor
     virtual void async_finalize() noexcept {
         _task = nullptr;
+        _error = {};
 
         // Keep this member for backtrace
         // _caller = nullptr;

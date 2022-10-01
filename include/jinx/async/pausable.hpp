@@ -43,6 +43,7 @@ protected:
         return this->_prev != this->_caller;
     }
 
+    // Move this Awaitable to the top of call stack
     void swap_awaitable() {
         auto* caller = this->_caller;
         if (caller->_caller != this) {
@@ -68,9 +69,12 @@ protected:
         return Awaitable::handle_error(error);
     }
 
+    /* 
+        Swap between the caller and this Awaitable.
+        Because we need a chance to finalize the Awaitable after the caller returns
+    */
     JINX_NO_DISCARD
     Async async_pause() noexcept{
-        // swap
         _prev = this->_caller->_caller;
         this->_caller->_caller = this;
         this->_task->_top = this->_caller;

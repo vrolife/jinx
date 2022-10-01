@@ -26,18 +26,21 @@ namespace jinx {
 Async Awaitable::run() {
     ControlState state;
     while (true) {
-        if (JINX_UNLIKELY(_task->_error)) 
+        if (JINX_UNLIKELY(this->_error)) 
         {
-            auto error = _task->_error;
-            _task->_error.clear();
+            /*
+                Member `_error` will be clean by move assign constructor
+            */
+            auto error = std::move(this->_error);
+
             state = handle_error(error);
 
             if (state == ControlState::Raise or state == ControlState::Passthrough)
             {
-                _task->_error = error;
                 if (JINX_UNLIKELY(_task->_exc == nullptr)) {
                     _task->_exc = this;
                 }
+                _caller->_error = error;
                 _task->_top = _caller;
                 this->async_finalize();
                 return Async{ControlState::Ready};
@@ -55,7 +58,7 @@ try {
 #if defined(__cpp_exceptions) && __cpp_exceptions
 } catch (...) {
             state = ControlState::Raise;
-            _task->set_error_code(make_error(ErrorAwaitable::CXXException));
+            this->_error = make_error(ErrorAwaitable::CXXException);
             _task->set_exception(std::current_exception());
 }
 #endif
@@ -103,7 +106,7 @@ JINX_ERROR_IMPLEMENT(awaitable, {
             return "Task is cancelled";
         case ErrorAwaitable::Popped:
             return "Task is popped";
-        case ErrorAwaitable::RaiseErrorCodeWithZero:
+        case ErrorAwaitable::InvalidErrorCode:
             return "Raise error::Error with value 0";
         case ErrorAwaitable::NoSys:
             return "Function not implemented";

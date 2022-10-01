@@ -77,7 +77,6 @@ protected:
 private:
     std::atomic<ControlState> _state{ControlState::Suspended};
     Awaitable* _top{nullptr};
-    error::Error _error{};
     TaskQueue* _task_queue{nullptr};
 #if defined(__cpp_exceptions) && __cpp_exceptions
     std::exception_ptr _exception;
@@ -397,7 +396,11 @@ protected:
 
     template<typename OnIdle, typename BeforeRun, typename OnTaskExit>
     inline
-    void run(const OnIdle& on_idle, const BeforeRun& before_run, const OnTaskExit& on_task_exit) { // NOLINT(readability-function-cognitive-complexity)
+    void run(
+        const OnIdle& on_idle, 
+        const BeforeRun& before_run, 
+        const OnTaskExit& on_task_exit) 
+    {
         while (not this->empty()) 
         {
             auto* task = _tasks_ready.pop();
@@ -467,7 +470,12 @@ public:
         auto state = task->_state.exchange(ControlState::Ready);
         if (state == ControlState::Ready) {
             task->set_error_code({});
-            // Task is queued in _ready_tasks. There is no safe way to pop it from _ready_tasks
+            /*
+                Task was inserted into _ready_tasks queue. 
+                There is no safe way to pop it from _ready_tasks queue.
+                So we clear the call stack and just return.
+                TaskQueue will pop it in next loop.
+            */
             return ErrorCancel::DeferredDequeue;
         }
 

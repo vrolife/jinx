@@ -111,11 +111,17 @@ Async Awaitable::async_yield() noexcept {
 inline
 Async Awaitable::async_throw(const error::Error& error) noexcept 
 {
+    /*
+        Sometimes, the base class returns normally(_top == _caller), 
+        but the derived class treats the result as an error and throws the error.
+        So, restore the pointer `_top` to handle error.
+    */
     _task->_top = this;
-    if (error) {
-        _task->_error = error;
+
+    if (error.value() == 0) {
+        this->_error = make_error(ErrorAwaitable::InvalidErrorCode);
     } else {
-        _task->_error = make_error(ErrorAwaitable::RaiseErrorCodeWithZero);
+        this->_error = error;
     }
     return Async{ControlState::Raise};
 }

@@ -39,7 +39,7 @@ const jinx::error::Category& category_##error_name() noexcept { \
 #define JINX_ERROR_DEFINE(name, enum_name) \
 const jinx::error::Category& category_##name() noexcept; \
 inline jinx::error::Error make_error(enum_name enum_value) noexcept { \
-    return jinx::error::Error{static_cast<std::size_t>(enum_value), category_##name()}; \
+    return jinx::error::Error{static_cast<int>(enum_value), category_##name()}; \
 }
 
 namespace jinx {
@@ -74,32 +74,41 @@ struct Category {
 const Category& category_uninitialized() noexcept;
 
 class Error {
-    std::size_t _value{};
     const Category* _category{};
+    int _value{};
 
 public:
     Error() noexcept : _value(0), _category(&category_uninitialized()) { }
-    Error(std::size_t value, const Category& category) noexcept
+    Error(int value, const Category& category) noexcept
     : _value(value), _category(&category) { }
 
     Error(const Error& other) noexcept = default;
-    Error(Error&& other) noexcept = default;
+    Error(Error&& other) noexcept {
+        _category = other._category;
+        _value = other._value;
+        other.clear();
+    }
 
     ~Error() noexcept = default;
 
     Error& operator=(const Error& other) noexcept = default;
-    Error& operator=(Error&& other) noexcept = default;
+    Error& operator=(Error&& other) noexcept {
+        _category = other._category;
+        _value = other._value;
+        other.clear();
+        return *this;
+    }
 
     void clear() noexcept {
         _value = 0;
         _category = nullptr;
     }
 
-    std::size_t value() const noexcept { return _value; }
+    int value() const noexcept { return _value; }
 
     const Category& category() const noexcept { return *_category; }
 
-    void assign(std::size_t value, const Category& category) noexcept {
+    void assign(int value, const Category& category) noexcept {
         _value = value;
         _category = &category;
     }
