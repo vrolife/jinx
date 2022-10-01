@@ -55,7 +55,7 @@ void EventEngineLibevent::EventDataIO::callback(int io_handle, short event, void
 }
 
 EventEngineLibevent::EventDataIO::EventDataIO(
-    EventEngineLibevent::IOCallback callback,
+    EventCallbackIO callback,
     void* arg)
 : _state(Pending), _callback(callback), _arg(arg)
 {}
@@ -83,7 +83,7 @@ void EventEngineLibevent::EventDataSimple::callback(int io_handle, short event, 
 }
 
 EventEngineLibevent::EventDataSimple::EventDataSimple(
-    EventEngineLibevent::Callback callback,
+    EventCallback callback,
     void* arg)
 : _state(Pending), _callback(callback), _arg(arg)
 {}
@@ -153,10 +153,10 @@ const void* EventEngineLibevent::type_tag() {
     return &libevent_type_tag;
 }
 
-void EventEngineLibevent::add_signal(
+ResultGeneric EventEngineLibevent::add_signal(
     EventHandleSignal& signal, 
     int sig, 
-    EventEngineLibevent::Callback callback, 
+    EventCallback callback, 
     void* arg)
 {
     signal.reset();
@@ -169,11 +169,12 @@ void EventEngineLibevent::add_signal(
         EV_SIGNAL, 
         &EventEngineLibevent::EventDataSimple::callback, &signal);
     event_add(&signal.get()._event, nullptr);
+    return Successful_;
 }
 
-void EventEngineLibevent::remove_signal(EventHandleSignal& signal) { // NOLINT
+ResultGeneric EventEngineLibevent::remove_signal(EventHandleSignal& signal) { // NOLINT
     if (signal.empty()) {
-        return;
+        return Failed_;
     }
 
     if (signal.get()._state == Running) {
@@ -181,9 +182,10 @@ void EventEngineLibevent::remove_signal(EventHandleSignal& signal) { // NOLINT
     } else {
         signal.reset();
     }
+    return Successful_;
 }
 
-void EventEngineLibevent::add_signal(
+ResultGeneric EventEngineLibevent::add_signal(
     EventHandleSignalFunctional& signal, 
     int sig, 
     std::function<void(const error::Error&)>&& callback)
@@ -202,11 +204,12 @@ void EventEngineLibevent::add_signal(
         &EventEngineLibevent::EventDataSimpleFunctional::callback, 
         &signal);
     event_add(&signal.get()._event, nullptr);
+    return Successful_;
 }
 
-void EventEngineLibevent::remove_signal(EventHandleSignalFunctional& signal) { // NOLINT
+ResultGeneric EventEngineLibevent::remove_signal(EventHandleSignalFunctional& signal) { // NOLINT
     if (signal.empty()) {
-        return;
+        return Failed_;
     }
 
     if (signal.get()._state == Running) {
@@ -214,12 +217,13 @@ void EventEngineLibevent::remove_signal(EventHandleSignalFunctional& signal) { /
     } else {
         signal.reset();
     }
+    return Successful_;
 }
 
-void EventEngineLibevent::add_timer(
+ResultGeneric EventEngineLibevent::add_timer(
     EventHandleTimer& timer, 
     struct timeval* timeval, 
-    EventEngineLibevent::Callback callback, 
+    EventCallback callback, 
     void* arg)
 {
     timer.reset();
@@ -235,11 +239,12 @@ void EventEngineLibevent::add_timer(
         &EventEngineLibevent::EventDataSimple::callback, 
         &timer);
     event_add(&timer.get()._event, timeval);
+    return Successful_;
 }
 
-void EventEngineLibevent::remove_timer(EventHandleTimer& timer) { // NOLINT
+ResultGeneric EventEngineLibevent::remove_timer(EventHandleTimer& timer) { // NOLINT
     if (timer.empty()) {
-        return;
+        return Failed_;
     }
 
     if (timer.get()._state == Running) {
@@ -247,13 +252,14 @@ void EventEngineLibevent::remove_timer(EventHandleTimer& timer) { // NOLINT
     } else {
         timer.reset();
     }
+    return Successful_;
 }
 
-void EventEngineLibevent::add_io(
+ResultGeneric EventEngineLibevent::add_io(
     unsigned int flags, 
     EventHandleIO& event_handle, 
     IONativeHandleType io_handle, 
-    EventEngineLibevent::IOCallback callback, 
+    EventCallbackIO callback, 
     void* arg)
 {
     event_handle.reset();
@@ -266,15 +272,17 @@ void EventEngineLibevent::add_io(
         &EventEngineLibevent::EventDataIO::callback, 
         &event_handle);
     event_add(&event_handle.get()._event, nullptr);
+    return Successful_;
 }
 
-void EventEngineLibevent::remove_io(EventHandleIO& handle) // NOLINT
+ResultGeneric EventEngineLibevent::remove_io(EventHandleIO& handle) // NOLINT
 {
     if (handle.get()._state == Running) {
         handle.get()._state = Deleted;
     } else {
         handle.reset();
     }
+    return Successful_;
 }
 
 #if 0

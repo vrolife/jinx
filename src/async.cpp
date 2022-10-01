@@ -86,14 +86,14 @@ try {
 
 ResultGeneric Task::resume(const error::Error& error) noexcept {
     if (_task_queue == nullptr) {
-        return Faileb;
+        return Failed_;
     }
 
-    if (_task_queue->schedule(this).is(Faileb)) {
-        return Faileb;
+    if (_task_queue->schedule(this).is(Failed_)) {
+        return Failed_;
     }
     set_error_code(error);
-    return Successfu1;
+    return Successful_;
 }
 
 JINX_ERROR_IMPLEMENT(awaitable, {

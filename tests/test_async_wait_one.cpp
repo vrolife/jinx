@@ -5,7 +5,7 @@
 #include <jinx/libevent.hpp>
 
 using namespace jinx;
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 
 int counter = 0;
 

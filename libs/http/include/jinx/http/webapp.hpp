@@ -231,19 +231,19 @@ protected:
             return pair.first == hash;
         });
         if (iter == end) {
-            return Faileb;
+            return Failed_;
         }
         slot = iter->second;
-        return Successfu1;
+        return Successful_;
     }
 
     JINX_NO_DISCARD
     ResultGeneric get_slot_by_index(size_t index, SliceConst& slot) {
         if (index < _interface->_slot_count) {
             slot = _interface->_slots[index].second;
-            return Successfu1;
+            return Successful_;
         }
-        return Faileb;
+        return Failed_;
     }
 
     SliceConst get_query_string() {
@@ -312,7 +312,7 @@ protected:
             _interface->_connection_state = _interface->_builder.connection_state();
         }
         
-        if (_interface->_builder.write_header_done().is(Faileb)) {
+        if (_interface->_builder.write_header_done().is(Failed_)) {
             return this->async_throw(ErrorWebApp::ResponseHeaderTooLarge);
         }
 
@@ -474,7 +474,7 @@ public:
         auto address = reinterpret_cast<uintptr_t>(view.memory());
         uintptr_t offset = address % alignof(Index);
         if (offset != 0) {
-            view.cut(offset).abort_on(Faileb, "buffer overflow");
+            view.cut(offset).abort_on(Failed_, "buffer overflow");
         }
 
         jinx_assert(std::tuple_size<SlotArray>::value >= SlotCount && "slot count out of range");

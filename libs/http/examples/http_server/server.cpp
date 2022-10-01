@@ -60,7 +60,7 @@ protected:
             _data,
             std::move(client), 
             _allocator
-        ).abort_on(Faileb, "out of memory");
+        ).abort_on(Failed_, "out of memory");
         return accept();
     }
 };
@@ -96,13 +96,13 @@ int main(int argc, const char* argv[])
     eve.add_signal(sigiterm, SIGTERM, [&](const error::Error& error){
         std::cout << "terminated\n";
         loop.exit();
-    });
+    }) >> JINX_IGNORE_RESULT;
 
     libevent::EventEngineLibevent::EventHandleSignalFunctional sigint;
     eve.add_signal(sigint, SIGINT, [&](const error::Error& error){
         std::cout << "interrupted\n";
         loop.exit();
-    });
+    }) >> JINX_IGNORE_RESULT;
 
     loop.run();
     return 0;

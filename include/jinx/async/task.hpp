@@ -326,7 +326,7 @@ JINX_NO_DISCARD
 inline
 ResultGeneric AwaitableTaskNode::resume(const error::Error& error) {
     this->_task->remove_hook(this);
-    return Successfu1;
+    return Successful_;
 }
 
 } // namespace detail
@@ -356,16 +356,16 @@ protected:
     virtual ResultGeneric schedule(Task* task) {
         auto state = task->_state.exchange(ControlState::Ready);
         if (state == ControlState::Ready) {
-            return Faileb;
+            return Failed_;
         }
         
         if (state == ControlState::Exited) {
             task->_state = ControlState::Exited;
-            return Faileb;
+            return Failed_;
         }
 
         _tasks_ready.push(task);
-        return Successfu1;
+        return Successful_;
     }
 
     JINX_NO_DISCARD
@@ -377,13 +377,13 @@ protected:
 
     JINX_NO_DISCARD
     ResultGeneric pop(TaskPtr& task) noexcept {
-        if (JINX_UNLIKELY(_tasks_all.erase(task).is(Faileb))) {
-            return Faileb; 
+        if (JINX_UNLIKELY(_tasks_all.erase(task).is(Failed_))) {
+            return Failed_; 
         }
         
         task->_task_queue = nullptr;
         task.unref();
-        return Successfu1;
+        return Successful_;
     }
 
     bool empty() const noexcept {
@@ -487,8 +487,8 @@ public:
 
     JINX_NO_DISCARD
     virtual ResultGeneric spawn(TaskPtr& task) {
-        if (push(task).is(Faileb)) {
-            return Faileb;
+        if (push(task).is(Failed_)) {
+            return Failed_;
         }
         return schedule(task);
     }
@@ -505,11 +505,11 @@ public:
     
     JINX_NO_DISCARD
     ResultGeneric schedule(Task *task) override {
-        if (TaskQueue::schedule(task).is(Faileb)) {
-            return Faileb;
+        if (TaskQueue::schedule(task).is(Failed_)) {
+            return Failed_;
         }
         _event_engine->wakeup();
-        return Successfu1;
+        return Successful_;
     }
 
     EventEngineAbstract* get_event_engine() override { return _event_engine; }
@@ -555,7 +555,7 @@ public:
             [](...) { },
             [&](Task* task) {
                 auto ptr = TaskPtr::shared_from_this(task);
-                if (JINX_UNLIKELY(pop(ptr).is(Faileb))) {
+                if (JINX_UNLIKELY(pop(ptr).is(Failed_))) {
                     error::error("The task is not attached to any queue");
                 }
 

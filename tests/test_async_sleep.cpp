@@ -7,7 +7,7 @@
 
 using namespace jinx;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 
 class AsyncTest : public AsyncRoutine {
     async::Sleep _sleep;

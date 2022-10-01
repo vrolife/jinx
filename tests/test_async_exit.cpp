@@ -11,7 +11,7 @@ enum class MyEnum {
     NoError
 };
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 
 class AsyncSleepTest : public AsyncRoutine {
     async::Sleep _sleep;

@@ -112,7 +112,7 @@ public:
             _connection_state = _builder.connection_state();
         }
         
-        if (_builder.write_header_done().is(Faileb)) {
+        if (_builder.write_header_done().is(Failed_)) {
             this->async_throw(ErrorHTTPClient::RequestHeaderTooLarge);
             return *this;
         }

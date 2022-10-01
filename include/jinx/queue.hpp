@@ -258,7 +258,7 @@ public:
                 return this->async_return();
             }
 
-            if (_queue->_pending_get.push_back(this).is(Faileb)) {
+            if (_queue->_pending_get.push_back(this).is(Failed_)) {
                 return this->async_throw(ErrorQueue::PendingGetError);
             }
 
@@ -332,7 +332,7 @@ public:
         }
         
         if (_queue->full()) {
-            if (static_cast<bool>(_queue->_pending_put.push_back(this).is(Faileb))) {
+            if (static_cast<bool>(_queue->_pending_put.push_back(this).is(Failed_))) {
                 return async_throw(ErrorQueue::PendingPutError);;
             }
             return this->async_suspend();

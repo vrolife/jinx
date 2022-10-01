@@ -171,7 +171,7 @@ protected:
     void async_finalize() noexcept override {
         if (not _handle.empty()) {
             auto* eve = this->template get_event_engine<EventEngineType>();
-            eve->remove_io(_handle);
+            eve->remove_io(_handle) >> JINX_IGNORE_RESULT;
             _handle.reset();
         }
         BaseType::async_finalize();
@@ -191,23 +191,27 @@ protected:
                 case ErrorCodeOpenSSL::WantRead:
                 {
                     auto* eve = this->template get_event_engine<EventEngineType>();
-                    eve->add_io(
+                    if (eve->add_io(
                         typename EventEngineType::IOTypeRead{},
                         _handle,
                         SSL_get_fd(_tls_impl._connection),
-                        &AsyncTLS::callback, this
-                    );
+                        &AsyncTLS::callback, this).is(Failed_))
+                    {
+                        return this->async_throw(ErrorEventEngine::FailedToRegisterIOEvent);
+                    }
                     return this->async_suspend();
                 }
                 case ErrorCodeOpenSSL::WantWrite:
                 {
                     auto* eve = this->template get_event_engine<EventEngineType>();
-                    eve->add_io(
+                    if (eve->add_io(
                         typename EventEngineType::IOTypeWrite{},
                         _handle,
                         SSL_get_fd(_tls_impl._connection),
-                        &AsyncTLS::callback, this
-                    );
+                        &AsyncTLS::callback, this).is(Failed_))
+                    {
+                        return this->async_throw(ErrorEventEngine::FailedToRegisterIOEvent);
+                    }
                     return this->async_suspend();
                 }
                 case ErrorCodeOpenSSL::Established:
@@ -225,7 +229,7 @@ protected:
     static void callback(unsigned int flags, const error::Error& error, void* data) {
         auto* self = reinterpret_cast<AsyncTLS*>(data);
         auto result = self->async_resume(error);
-        jinx_assert(result.is(Successfu1));
+        jinx_assert(result.is(Successful_));
     }
 };
 

@@ -8,7 +8,7 @@
 
 using namespace jinx;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 
 typedef libevent::EventEngineLibevent EventEngine;
 
@@ -47,13 +47,13 @@ int main(int argc, const char* argv[])
     bool flag = false;
 
     eve.add_signal(sigint, SIGUSR1, [&](const error::Error& error){
-        eve.remove_signal(sigint);
+        eve.remove_signal(sigint) >> JINX_IGNORE_RESULT;
 
         std::cout << "exit\n";
         flag = true;
         loop.cancel(task) >> JINX_IGNORE_RESULT;
         eve.wakeup();
-    });
+    }).abort_on(Failed_, "reigster signal event failed");
 
     loop.run();
 

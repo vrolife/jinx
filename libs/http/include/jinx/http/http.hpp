@@ -203,7 +203,7 @@ protected:
 
     ResultGeneric write_header_done() {
         this->_output_stream << "\r\n";
-        return _overflow == 0 ? Successfu1 : Faileb;
+        return _overflow == 0 ? Successful_ : Failed_;
     }
 
     int_type overflow(int_type cha) override {
@@ -614,7 +614,7 @@ protected:
 
             // cut buffer view to protect header content
             auto header_size = reinterpret_cast<uintptr_t>(_buffer->begin()) - reinterpret_cast<uintptr_t>(_buffer->memory());
-            if(JINX_UNLIKELY(_buffer->cut(header_size).is(Faileb))) {
+            if(JINX_UNLIKELY(_buffer->cut(header_size).is(Failed_))) {
                 error::fatal("HTTP parser memory overflow");
             }
 

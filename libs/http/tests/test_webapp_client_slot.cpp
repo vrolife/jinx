@@ -12,7 +12,7 @@ using namespace jinx;
 using namespace jinx::http;
 using namespace jinx::stream;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 struct PageIndex : WebPage {
@@ -24,7 +24,7 @@ struct PageIndex : WebPage {
     Async http_handle_request() override 
     {
         SliceConst slot{};
-        get_slot_by_hash(hash::hash_string("file_id"), slot).abort_on(Faileb, "get slot failed");
+        get_slot_by_hash(hash::hash_string("file_id"), slot).abort_on(Failed_, "get slot failed");
 
         _buffer = buffer::BufferView {
             const_cast<char*>(slot.begin()),

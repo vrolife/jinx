@@ -18,7 +18,7 @@ namespace example {
 using namespace jinx;
 using namespace jinx::http;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 struct Root {

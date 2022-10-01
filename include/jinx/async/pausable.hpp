@@ -229,8 +229,8 @@ public:
 protected:
     JINX_NO_DISCARD
     ResultGeneric schedule(Task *task) override {
-        if (TaskQueue::schedule(task).is(Faileb)) {
-            return Faileb;
+        if (TaskQueue::schedule(task).is(Failed_)) {
+            return Failed_;
         }
         return this->async_resume();
     }
@@ -247,7 +247,7 @@ protected:
             [&](Task* task) {
                 auto ptr = TaskPtr::shared_from_this(task);
                 
-                if (JINX_UNLIKELY(pop(ptr).is(Faileb))) {
+                if (JINX_UNLIKELY(pop(ptr).is(Failed_))) {
                     error::error("The task is not attached to any queue");
                 }
                 static_cast<Tagged*>(task)->set_bound_task(nullptr);

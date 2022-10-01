@@ -94,7 +94,7 @@ public:
                 return Queue2Status::Complete;
             }
 
-            if (_pending_get.push_back(node).is(Faileb)) {
+            if (_pending_get.push_back(node).is(Failed_)) {
                 return Queue2Status::Error;
             }
             return Queue2Status::Pending;
@@ -120,7 +120,7 @@ public:
             pop();
         }
         if (full()) {
-            if (_pending_put.push_back(node).is(Faileb)) {
+            if (_pending_put.push_back(node).is(Failed_)) {
                 return Queue2Status::Error;
             }
             return Queue2Status::Pending;

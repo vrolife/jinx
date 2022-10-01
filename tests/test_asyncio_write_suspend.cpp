@@ -16,7 +16,7 @@
 
 using namespace jinx;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 int counter = 0;

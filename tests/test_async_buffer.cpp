@@ -34,7 +34,7 @@ int main(int argc, char const *argv[])
     posix::MemoryProvider memory{};
     AllocatorType allocator{memory};
 
-    assert(loop.task_allocate<TaskBufferredConfig<AsyncTest>>(&allocator).is(Successfu1));
+    assert(loop.task_allocate<TaskBufferredConfig<AsyncTest>>(&allocator).is(Successful_));
     
     loop.run();
     return 0;

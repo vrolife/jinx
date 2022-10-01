@@ -135,22 +135,22 @@ public:
     JINX_NO_DISCARD
     ResultGeneric resize(size_t size) noexcept {
         if (JINX_UNLIKELY(size > (_memory_size - _begin))) {
-            return Faileb;
+            return Failed_;
         }
         _end = _begin + size;
-        return Successfu1;
+        return Successful_;
     }
 
     JINX_NO_DISCARD
     ResultGeneric cut(size_t n)  noexcept {
         if (n > _begin) {
-            return Faileb;
+            return Failed_;
         }
         _memory += n;
         _memory_size -= n;
         _begin -= n;
         _end -= n;
-        return Successfu1;
+        return Successful_;
     }
 
     char* data() const noexcept { return &_memory[_begin]; }
@@ -616,7 +616,7 @@ protected:
             return this->async_return();
         }
 
-        if (_pool->register_request(this).is(Faileb)) {
+        if (_pool->register_request(this).is(Failed_)) {
             return this->async_throw(ErrorAllocate::RegisterAllocateError);
         }
         return this->async_suspend();
@@ -656,7 +656,7 @@ public:
     ResultGeneric allocate(TaskQueue* queue, Allocator* allocator, TArgs&&... args) {
         auto buf = allocator->allocate(Config{});
         if (buf == nullptr) {
-            return Faileb;
+            return Failed_;
         }
 
         auto& view = buf.get()->view();
@@ -666,8 +666,8 @@ public:
         auto address = reinterpret_cast<uintptr_t>(view.memory());
         uintptr_t offset = address % alignof(TaskType);
         if (offset != 0) {
-            if (view.cut(offset).is(Faileb)) {
-                return Faileb;
+            if (view.cut(offset).is(Failed_)) {
+                return Failed_;
             }
         }
         const auto size = sizeof(TaskType);
@@ -687,7 +687,7 @@ public:
         // self held buffer
         buf.release();
         
-        return Successfu1;
+        return Successful_;
     }
 private:
     template<typename Buffer, typename TaskType>

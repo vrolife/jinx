@@ -25,7 +25,9 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 namespace jinx {
 
 template<typename EventEngine>
-struct AsyncEngine {
+struct AsyncImplement {
+    typedef EventEngine EventEngineType;
+
     template<typename T>
     using Wait = jinx::Wait<T, EventEngine>;
 

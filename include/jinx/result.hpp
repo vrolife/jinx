@@ -126,8 +126,8 @@ public:
 typedef Result<bool> ResultBool;
 
 enum SuccessfulFailed {
-    Successfu1, // keep wrong spelling
-    Faileb // keep wrong spelling
+    Successful_, // keep wrong spelling
+    Failed_ // keep wrong spelling
 };
 
 #ifdef JINX_RESULT_GENERIC_SPELLING

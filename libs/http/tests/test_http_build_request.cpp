@@ -9,7 +9,7 @@ using namespace jinx::stream;
 using namespace jinx::buffer;
 using namespace jinx::http;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 typedef HTTPConfigDefault HTTPConfig;
@@ -45,7 +45,7 @@ int main(int argc, const char* argv[])
     _request.write_header_field("Host") << "example.com";
     _request.write_header_field("User-Agent") << "jinx/0.0.1";
     _request.write_header_field("Accept") << "*/*";
-    jinx_assert(_request.write_header_done().is(Successfu1));
+    jinx_assert(_request.write_header_done().is(Successful_));
 
     auto header = buffer->slice_for_consumer();
     std::string header_str{header.begin(), header.end()};

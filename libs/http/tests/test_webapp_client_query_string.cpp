@@ -12,7 +12,7 @@ using namespace jinx;
 using namespace jinx::http;
 using namespace jinx::stream;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 struct PageIndex : WebPage {

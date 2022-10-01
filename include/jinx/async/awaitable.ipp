@@ -172,7 +172,7 @@ inline
 ResultGeneric Awaitable::async_resume(const error::Error& error)
 {
     if (_task == nullptr) {
-        return Faileb;
+        return Failed_;
     }
     return _task->resume(error);
 }

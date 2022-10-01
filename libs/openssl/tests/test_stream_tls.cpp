@@ -13,7 +13,7 @@ using namespace jinx::stream;
 using namespace jinx::buffer;
 using namespace jinx::openssl;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 class AsyncEcho : public AsyncRoutine {

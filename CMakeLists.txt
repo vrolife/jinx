@@ -37,6 +37,7 @@ set(JINX_SOURCES
     src/error.cpp
     src/async.cpp 
     src/libevent.cpp 
+    src/eventengine.cpp 
     src/posix.cpp 
     src/argparse.cpp 
     src/stream.cpp

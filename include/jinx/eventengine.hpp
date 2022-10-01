@@ -24,6 +24,21 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 namespace jinx {
 
+enum class ErrorEventEngine {
+    NoError,
+    FailedToRegisterTimerEvent,
+    FailedToRegisterIOEvent,
+    FailedToRegisterSignalEvent,
+    FailedToRemoveTimerEvent,
+    FailedToRemoveIOEvent,
+    FailedToRemoveSignalEvent,
+};
+
+JINX_ERROR_DEFINE(event_engine, ErrorEventEngine);
+
+typedef void(*EventCallback)(const error::Error&, void*);
+typedef void(*EventCallbackIO)(unsigned int flags, const error::Error&, void*);
+
 struct IOResult {
     error::Error _error{}; // TODO error condition
     union {

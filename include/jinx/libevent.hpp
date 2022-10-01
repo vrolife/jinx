@@ -49,8 +49,6 @@ class EventEngineLibevent : public EventEngineAbstract {
 
 public:
     typedef int IONativeHandleType;
-    typedef void(*Callback)(const error::Error&, void*);
-    typedef void(*IOCallback)(unsigned int flags, const error::Error&, void*);
     typedef ::jinx::posix::IOHandle IOHandleType;
 
     constexpr static const IONativeHandleType IONativeHandleInvalidValue = -1;
@@ -91,41 +89,69 @@ public:
     }
 
     // signal
-    void add_signal(EventHandleSignal& signal, int sig, Callback, void* arg);
-    void remove_signal(EventHandleSignal& signal);
 
-    void add_signal(EventHandleSignalFunctional& signal, int sig, std::function<void(const error::Error&)>&&);
-    void remove_signal(EventHandleSignalFunctional& signal);
+    JINX_NO_DISCARD
+    ResultGeneric add_signal(EventHandleSignal& signal, int sig, EventCallback, void* arg);
+
+    JINX_NO_DISCARD
+    ResultGeneric remove_signal(EventHandleSignal& signal);
+
+
+    JINX_NO_DISCARD
+    ResultGeneric add_signal(EventHandleSignalFunctional& signal, int sig, std::function<void(const error::Error&)>&&);
+
+    JINX_NO_DISCARD
+    ResultGeneric remove_signal(EventHandleSignalFunctional& signal);
 
     // timer
-    void add_timer(EventHandleTimer& timer, struct timeval* timeval, Callback, void* arg);
-    void remove_timer(EventHandleTimer& timer);
+
+    JINX_NO_DISCARD
+    ResultGeneric add_timer(EventHandleTimer& timer, struct timeval* timeval, EventCallback, void* arg);
+
+    JINX_NO_DISCARD
+    ResultGeneric remove_timer(EventHandleTimer& timer);
 
     // reactor
-    // the handle will not be deleted automatically
-    void add_reader(EventHandleIO& event_handle, IONativeHandleType io_handle, IOCallback callback, void* arg) {
-        add_io(IOFlagRead, event_handle, io_handle, callback, arg);
-    }
-    void add_writer(EventHandleIO& event_handle, IONativeHandleType io_handle, IOCallback callback, void* arg) {
-        add_io(IOFlagWrite, event_handle, io_handle, callback, arg);
-    }
-    void add_reader_writer(EventHandleIO& event_handle, IONativeHandleType io_handle, IOCallback callback, void* arg) {
-        add_io(IOTypeReadWrite::Flags, event_handle, io_handle, callback, arg);
+    // The IO handle will not be deleted automatically
+    
+
+    JINX_NO_DISCARD
+    ResultGeneric add_reader(EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) {
+        return add_io(IOFlagRead, event_handle, io_handle, callback, arg);
     }
 
-    inline void add_io(const IOTypeRead& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, IOCallback callback, void* arg) { 
+    JINX_NO_DISCARD
+    ResultGeneric add_writer(EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) {
+        return add_io(IOFlagWrite, event_handle, io_handle, callback, arg);
+    }
+
+    JINX_NO_DISCARD
+    ResultGeneric add_reader_writer(EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) {
+        return add_io(IOTypeReadWrite::Flags, event_handle, io_handle, callback, arg);
+    }
+
+    JINX_NO_DISCARD
+    inline ResultGeneric add_io(const IOTypeRead& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) { 
         return add_io(IOTypeRead::Flags, event_handle, io_handle, callback, arg); 
     }
-    inline void add_io(const IOTypeWrite& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, IOCallback callback, void* arg) {
+
+    JINX_NO_DISCARD
+    inline ResultGeneric add_io(const IOTypeWrite& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) {
         return add_io(IOTypeWrite::Flags, event_handle, io_handle, callback, arg); 
     }
-    inline void add_io(const IOTypeReadWrite& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, IOCallback callback, void* arg) { 
+
+    JINX_NO_DISCARD
+    inline ResultGeneric add_io(const IOTypeReadWrite& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) { 
         return add_io(IOTypeReadWrite::Flags, event_handle, io_handle, callback, arg); 
     }
 
-    void add_io(unsigned int flags, EventHandleIO& handle, IONativeHandleType io_handle, IOCallback callback, void* arg);
 
-    void remove_io(EventHandleIO& handle);
+    JINX_NO_DISCARD
+    ResultGeneric add_io(unsigned int flags, EventHandleIO& handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg);
+
+
+    JINX_NO_DISCARD
+    ResultGeneric remove_io(EventHandleIO& handle);
 
     // poll
     void poll() override;
@@ -252,12 +278,12 @@ class EventEngineLibevent::EventDataSimple {
 
     struct event _event{};
     int _state;
-    EventEngineLibevent::Callback _callback;
+    EventCallback _callback;
     void* _arg;
 
     static void callback(int io_handle, short event, void* arg);
 public:
-    EventDataSimple(EventEngineLibevent::Callback callback, void* arg);
+    EventDataSimple(EventCallback callback, void* arg);
     JINX_NO_COPY_NO_MOVE(EventDataSimple);
     ~EventDataSimple();
 };
@@ -267,12 +293,12 @@ class EventEngineLibevent::EventDataIO {
 
     struct event _event{};
     int _state;
-    EventEngineLibevent::IOCallback _callback;
+    EventCallbackIO _callback;
     void* _arg;
 
     static void callback(int io_handle, short event, void* arg);
 public:
-    EventDataIO(EventEngineLibevent::IOCallback callback, void* arg);
+    EventDataIO(EventCallbackIO callback, void* arg);
     JINX_NO_COPY_NO_MOVE(EventDataIO);
     ~EventDataIO();
 };

@@ -11,7 +11,7 @@ using namespace jinx;
 #define VARIANT jinx::VariantRecursive
 #endif
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 
 class AsyncTest : public AsyncRoutine {
     VARIANT<async::Sleep, AsyncDoNothing> _var{};

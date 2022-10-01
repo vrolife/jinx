@@ -433,7 +433,7 @@ class AsyncSleep : public Awaitable, public MixinResult<void>
 protected:
     void async_finalize() noexcept override {
         auto* eve = this->template get_event_engine<EventEngine>();
-        eve->remove_timer(_handle);
+        eve->remove_timer(_handle) >> JINX_IGNORE_RESULT;
         Awaitable::async_finalize();
     }
 
@@ -459,14 +459,16 @@ public:
 
         auto* eve = this->template get_event_engine<EventEngine>();
 
-        eve->add_timer(_handle, &_timeval, &AsyncSleep::timer_callabck, this);
+        if (eve->add_timer(_handle, &_timeval, &AsyncSleep::timer_callabck, this).is(Failed_)) {
+            return this->async_throw(ErrorEventEngine::FailedToRegisterTimerEvent);
+        }
         return this->async_suspend();
     }
 
     static void timer_callabck(const error::Error& error, void* data) {
         auto* self = reinterpret_cast<AsyncSleep*>(data);
         auto* eve = self->template get_event_engine<EventEngine>();
-        eve->remove_timer(self->_handle);
+        eve->remove_timer(self->_handle) >> JINX_IGNORE_RESULT;
         self->emplace_result();
         self->async_resume() >> JINX_IGNORE_RESULT;
     }

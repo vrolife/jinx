@@ -45,7 +45,7 @@ struct LinkedList {
     ResultGeneric push_front(T* value) noexcept {
         auto node = static_cast<Node*>(value);
         if (node->_next != nullptr or node->_prev != nullptr) {
-            return Faileb;
+            return Failed_;
         }
 
         _head->_prev = node;
@@ -56,14 +56,14 @@ struct LinkedList {
         _head = node;
 
         _size += 1;
-        return Successfu1;
+        return Successful_;
     }
 
     JINX_NO_DISCARD
     ResultGeneric push_back(T* value) noexcept {
         auto node = static_cast<Node*>(value);
         if (node->_next != nullptr or node->_prev != nullptr) {
-            return Faileb;
+            return Failed_;
         }
         
         node->_prev = _end._prev;
@@ -74,14 +74,14 @@ struct LinkedList {
         _end._prev = node;
 
         _size += 1;
-        return Successfu1;
+        return Successful_;
     }
 
     JINX_NO_DISCARD
     ResultGeneric erase(T* value) noexcept {
         auto node = static_cast<Node*>(value);
         if (node->_next == nullptr and node->_prev == nullptr) {
-            return Faileb;
+            return Failed_;
         }
 
         if (node->_prev == nullptr) {
@@ -96,7 +96,7 @@ struct LinkedList {
         }
 
         _size -= 1;
-        return Successfu1;
+        return Successful_;
     }
 
     bool empty() const noexcept { return _size == 0; }

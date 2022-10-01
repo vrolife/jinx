@@ -1006,7 +1006,7 @@ protected:
     void async_finalize() noexcept override {
         if (not _handle.empty()) {
             auto* eve = this->template get_event_engine<EventEngineType>();
-            eve->remove_io(_handle);
+            eve->remove_io(_handle) >> JINX_IGNORE_RESULT;
             _handle.reset();
         }
         _io_impl.reset();
@@ -1038,12 +1038,15 @@ protected:
         if (result._error.category() == category_again()) {
             auto* eve = this->template get_event_engine<EventEngineType>();
 
-            eve->add_io(
+            if (eve->add_io(
                     typename IOImpl::IOType{}, 
                     _handle, 
                     _io_impl.native_handle(), 
                     &AsyncIOCommon<IOImpl>::io_callback, 
-                    this);
+                    this).is(Failed_))
+            {
+                return this->async_throw(ErrorEventEngine::FailedToRegisterIOEvent);
+            }
             return this->async_suspend();
         }
         return BaseType::async_throw(result._error);

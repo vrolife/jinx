@@ -6,7 +6,7 @@
 using namespace jinx;
 using namespace jinx::buffer;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 typedef BufferAllocator<posix::MemoryProvider, BufferConfigExample> AllocatorType;

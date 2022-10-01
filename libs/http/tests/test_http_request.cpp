@@ -13,7 +13,7 @@ using namespace jinx::stream;
 using namespace jinx::buffer;
 using namespace jinx::http;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 typedef HTTPConfigDefault HTTPConfig;
@@ -157,7 +157,7 @@ public:
         _request.write_header_field("User-Agent") << "jinx/0.0.1";
         _request.write_header_field("Accept") << "*/*";
         _request.write_header_field("Connection") << "keep-alive";
-        if (_request.write_header_done().is(Faileb)) {
+        if (_request.write_header_done().is(Failed_)) {
             return this->async_throw(HTTPBuilderStatus::RequestEntityTooLarge);
         }
 

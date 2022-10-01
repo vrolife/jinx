@@ -9,7 +9,7 @@ using namespace jinx::stream;
 using namespace jinx::buffer;
 using namespace jinx::http;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 struct HTTPConfig {

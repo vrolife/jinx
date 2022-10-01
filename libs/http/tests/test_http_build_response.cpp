@@ -11,7 +11,7 @@ using namespace jinx::stream;
 using namespace jinx::buffer;
 using namespace jinx::http;
 
-typedef AsyncEngine<libevent::EventEngineLibevent> async;
+typedef AsyncImplement<libevent::EventEngineLibevent> async;
 typedef posix::AsyncIOPosix<libevent::EventEngineLibevent> asyncio;
 
 typedef HTTPConfigDefault HTTPConfig;
@@ -48,7 +48,7 @@ int main(int argc, const char* argv[])
     _response.write_header_field("Content-Type") << "text/plain";
     _response.write_header_field("Content-Length") << "0";
     _response.write_header_field("Connection") << "close";
-    jinx_assert(_response.write_header_done().is(Successfu1));
+    jinx_assert(_response.write_header_done().is(Successful_));
 
     auto header = buffer->slice_for_consumer();
     std::string header_str{header.begin(), header.end()};

@@ -130,7 +130,7 @@ protected:
             return this->async_return();
         }
 
-        if (_lock->_pending_aws.push_front(this).is(Faileb)) {
+        if (_lock->_pending_aws.push_front(this).is(Failed_)) {
             _lock.reset();
             return async_throw(ErrorAwaitable::InternalError);
         }
