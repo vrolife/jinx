@@ -17,7 +17,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef __raii_hpp__
 #define __raii_hpp__
 
-#define JINX_SIMPLE_RAII_OBJECT(ObjectName, ObjectType, __free) \
+#define JINX_RAII_SIMPLE_OBJECT(ObjectName, ObjectType, __free) \
 class ObjectName \
 { \
     ObjectType *_obj{nullptr}; \
@@ -72,7 +72,7 @@ public: \
     const ObjectType* operator ->() const noexcept { return _obj; } \
 };
 
-#define JINX_SHARED_RAII_OBJECT(ObjectName, ObjectType, __ref, __unref) \
+#define JINX_RAII_SHARED_OBJECT(ObjectName, ObjectType, __ref, __unref) \
 class ObjectName \
 { \
     ObjectType* _obj{nullptr}; \
