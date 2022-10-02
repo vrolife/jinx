@@ -456,7 +456,13 @@ protected:
             auto ptr = TaskPtr::shared_from_this(task);
             TaskQueue::cancel(ptr) >> JINX_IGNORE_RESULT;
         });
+
         while(_tasks_ready.pop() != nullptr) {};
+        
+        _tasks_all.for_each([this](Task* task){
+            auto ptr = TaskPtr::shared_from_this(task);
+            pop(ptr) >> JINX_IGNORE_RESULT;
+        });
     }
 
 public:
