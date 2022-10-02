@@ -189,8 +189,9 @@ protected:
         return SSL_get_fd(_tls_impl._connection);
     }
 
+    template<typename T>
     typename EventEngineType::IOHandleNativeType get_native_handle(...) {
-        return reinterpret_cast<typename EventEngineType::IOHandleNativeType>(SSL_get_app_data(_tls_impl._connection));
+        return EventEngineType::get_native_handle(_tls_impl._connection);
     }
 
     Async do_tls_io() {

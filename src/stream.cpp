@@ -22,9 +22,11 @@ namespace stream {
 JINX_ERROR_IMPLEMENT(stream, {
     switch(code.as<ErrorStream>()) {
         case ErrorStream::NoError:
-            return "no error";
+            return "No error";
         case ErrorStream::EndOfStream:
-            return "end of stream";
+            return "End of stream";
+        case ErrorStream::BrokenStream:
+            return "Broken stream";
     }
     return "unknown error value";
 });

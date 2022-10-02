@@ -101,8 +101,17 @@ public:
 
     static void set_debug(bool enable);
 
+    static
+    IOHandleNativeType get_native_handle(IOHandleType& handle) {
+        return handle.native_handle();
+    }
+
+    static
+    IOHandleNativeType get_native_handle(IOHandleNativeType handle) {
+        return handle;
+    }
+
     // reactor
-    // The IO handle will not be deleted automatically
     JINX_NO_DISCARD
     static
     inline ResultGeneric add_io(

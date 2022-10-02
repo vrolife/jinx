@@ -26,7 +26,8 @@ namespace stream {
 
 enum class ErrorStream {
     NoError,
-    EndOfStream
+    EndOfStream,
+    BrokenStream
 };
 
 JINX_ERROR_DEFINE(stream, ErrorStream);
