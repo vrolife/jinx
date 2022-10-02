@@ -78,10 +78,11 @@ public: \
         } \
     } \
  \
-    void reset() noexcept { \
-        up_ref(); \
-        _obj = nullptr; \
+    void reset(ObjectType* ptr=nullptr) noexcept { \
+        free(); \
+        _obj = ptr; \
     } \
+\
     ObjectType* release() { \
         auto* obj = _obj; \
         _obj = nullptr; \
