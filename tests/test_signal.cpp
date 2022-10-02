@@ -22,8 +22,7 @@ public:
     }
 
     Async prepare() {
-        auto* eve = this->template get_event_engine<EventEngine>();
-        eve->add_signal(_signal, SIGUSR1, &AsyncTest::on_signal, this).abort_on(Failed_, "register signal event failed");
+        EventEngine::add_signal(this, _signal, SIGUSR1, &AsyncTest::on_signal, this).abort_on(Failed_, "register signal event failed");
         async_start(&AsyncTest::exit);
         return this->async_suspend();
     }
@@ -35,8 +34,7 @@ public:
 
     static void on_signal(const error::Error& error, void* data) {
         auto* self = reinterpret_cast<AsyncTest*>(data);
-        auto* eve = self->template get_event_engine<EventEngine>();
-        eve->remove_signal(self->_signal) >> JINX_IGNORE_RESULT;
+        EventEngine::remove_signal(self, self->_signal) >> JINX_IGNORE_RESULT;
         self->async_resume(error) >> JINX_IGNORE_RESULT;
         counter ++;
     }

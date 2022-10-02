@@ -153,7 +153,7 @@ class AsyncTLS : public AsyncFunction<typename TLSImpl::TLSResultType> {
 
     typedef AsyncIOImpl asyncio;
     typedef typename asyncio::EventEngineType EventEngineType;
-    typedef typename EventEngineType::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngineType::IOHandleNativeType IOHandleNativeType;
 
     typename EventEngineType::EventHandleIO _handle{};
 
@@ -171,8 +171,7 @@ public:
 protected:
     void async_finalize() noexcept override {
         if (not _handle.empty()) {
-            auto* eve = this->template get_event_engine<EventEngineType>();
-            eve->remove_io(_handle) >> JINX_IGNORE_RESULT;
+            EventEngineType::remove_io(this, _handle) >> JINX_IGNORE_RESULT;
             _handle.reset();
         }
         BaseType::async_finalize();
@@ -184,6 +183,16 @@ protected:
         BaseType::print_backtrace(error, indent + 1);
     }
 
+    template<typename EventEngine>
+    typename std::enable_if<std::is_same<typename EventEngine::IOHandleNativeType, int>::value, int>::
+    type get_native_handle(int ignored) {
+        return SSL_get_fd(_tls_impl._connection);
+    }
+
+    typename EventEngineType::IOHandleNativeType get_native_handle(...) {
+        return reinterpret_cast<typename EventEngineType::IOHandleNativeType>(SSL_get_app_data(_tls_impl._connection));
+    }
+
     Async do_tls_io() {
         auto result = _tls_impl.io();
         this->emplace_result((typename TLSImpl::TLSResultType)result);
@@ -191,11 +200,11 @@ protected:
             switch (static_cast<ErrorCodeOpenSSL>(result._error.value())) {
                 case ErrorCodeOpenSSL::WantRead:
                 {
-                    auto* eve = this->template get_event_engine<EventEngineType>();
-                    if (eve->add_io(
+                    if (EventEngineType::add_io(
+                        this,
                         typename EventEngineType::IOTypeRead{},
                         _handle,
-                        SSL_get_fd(_tls_impl._connection),
+                        get_native_handle<EventEngineType>(0),
                         &AsyncTLS::callback, this).is(Failed_))
                     {
                         return this->async_throw(ErrorEventEngine::FailedToRegisterIOEvent);
@@ -204,11 +213,11 @@ protected:
                 }
                 case ErrorCodeOpenSSL::WantWrite:
                 {
-                    auto* eve = this->template get_event_engine<EventEngineType>();
-                    if (eve->add_io(
+                    if (EventEngineType::add_io(
+                        this,
                         typename EventEngineType::IOTypeWrite{},
                         _handle,
-                        SSL_get_fd(_tls_impl._connection),
+                        get_native_handle<EventEngineType>(0),
                         &AsyncTLS::callback, this).is(Failed_))
                     {
                         return this->async_throw(ErrorEventEngine::FailedToRegisterIOEvent);

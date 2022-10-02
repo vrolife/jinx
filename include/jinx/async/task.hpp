@@ -55,7 +55,7 @@ class Task
     template<typename T>
     friend class pointer::PointerShared;
 
-    template<typename T, typename EventEngine>
+    template<typename T>
     friend class Wait;
 
     template<typename Base>
@@ -64,6 +64,7 @@ class Task
     friend class Loop;
     friend class Awaitable;
     friend class AwaitablePausable;
+    friend class EventEngineAbstract;
     friend class AsyncWait;
     friend class LinkedListThreadSafe<Task>;
     friend class LinkedList<Task>;
@@ -334,6 +335,10 @@ ResultGeneric AwaitableTaskNode::resume(const error::Error& error) {
 class TaskQueue {
     friend class Task;
     friend class Awaitable;
+    friend class EventEngineAbstract;
+    
+    template<typename T>
+    friend class Wait;
 
     LinkedList<Task> _tasks_all{};
 

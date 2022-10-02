@@ -77,14 +77,6 @@ protected:
     }
 };
 
-template<typename T>
-inline
-T* Awaitable::get_event_engine() noexcept {
-    auto* event_engine = _task->_task_queue->get_event_engine();
-    jinx_assert(event_engine->get_type_tag() == T:: type_tag());
-    return static_cast<T*>(event_engine);
-}
-
 inline
 TaskPtr Awaitable::get_task() noexcept {
     return TaskPtr::shared_from_this(_task);

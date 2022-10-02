@@ -33,7 +33,7 @@ class AsyncTest : public AsyncRoutine {
 
 public:
     AsyncTest& operator ()() {
-        _wait.initialize(std::chrono::milliseconds(1000000), WaitCondition::AllCompleted);
+        _wait.initialize(WaitCondition::AllCompleted);
         _wait.branch_create(_sleep1(std::chrono::milliseconds(20)).set_tag(Sleep1)) >> JINX_IGNORE_RESULT;
         _wait.branch_create(_raise_error().set_tag(Raise)) >> JINX_IGNORE_RESULT;
 

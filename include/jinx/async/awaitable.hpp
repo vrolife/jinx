@@ -51,7 +51,7 @@ class TaskStatic;
 template<typename Base, typename A>
 class TaskEntry;
 
-template<typename T, typename EventEngine>
+template<typename T>
 class Wait;
 
 namespace detail {
@@ -114,7 +114,7 @@ class Async {
     template<typename Base>
     friend class MixinPausable;
 
-    template<typename T, typename EventEngine>
+    template<typename T>
     friend class Wait;
 
     ControlState _state;
@@ -131,7 +131,7 @@ typedef ControlState Async;
 #endif
 
 class Awaitable {
-    template<typename T, typename EventEngine>
+    template<typename T>
     friend class Wait;
 
     template<typename Base>
@@ -143,6 +143,7 @@ class Awaitable {
     friend class Loop;
     friend class Task;
     friend class TaskQueue;
+    friend class EventEngineAbstract;
 
     Task* _task{nullptr};
 
@@ -159,9 +160,6 @@ public:
 protected:
     Awaitable() = default;
     JINX_NO_COPY_NO_MOVE(Awaitable);
-
-    template<typename T>
-    T* get_event_engine() noexcept;
 
     TaskPtr get_task() noexcept;
 
@@ -432,8 +430,7 @@ class AsyncSleep : public Awaitable, public MixinResult<void>
 
 protected:
     void async_finalize() noexcept override {
-        auto* eve = this->template get_event_engine<EventEngine>();
-        eve->remove_timer(_handle) >> JINX_IGNORE_RESULT;
+        EventEngine::remove_timer(this, _handle) >> JINX_IGNORE_RESULT;
         Awaitable::async_finalize();
     }
 
@@ -456,10 +453,7 @@ public:
         if (not this->empty()) {
             return this->async_return();
         }
-
-        auto* eve = this->template get_event_engine<EventEngine>();
-
-        if (eve->add_timer(_handle, &_timeval, &AsyncSleep::timer_callabck, this).is(Failed_)) {
+        if (EventEngine::add_timer(this, _handle, &_timeval, &AsyncSleep::timer_callabck, this).is(Failed_)) {
             return this->async_throw(ErrorEventEngine::FailedToRegisterTimerEvent);
         }
         return this->async_suspend();
@@ -467,8 +461,7 @@ public:
 
     static void timer_callabck(const error::Error& error, void* data) {
         auto* self = reinterpret_cast<AsyncSleep*>(data);
-        auto* eve = self->template get_event_engine<EventEngine>();
-        eve->remove_timer(self->_handle) >> JINX_IGNORE_RESULT;
+        EventEngine::remove_timer(self, self->_handle) >> JINX_IGNORE_RESULT;
         self->emplace_result();
         self->async_resume() >> JINX_IGNORE_RESULT;
     }

@@ -36,7 +36,7 @@ class StreamSend : public Send
 
 public:
     StreamSend& operator()(
-        typename EventEngineType::IONativeHandleType handle, 
+        typename EventEngineType::IOHandleNativeType handle, 
         buffer::BufferView* view) 
     {
 #if __linux__
@@ -87,7 +87,7 @@ class StreamRecv : public Recv
 
 public:
     StreamRecv& operator()(
-        typename EventEngineType::IONativeHandleType handle, 
+        typename EventEngineType::IOHandleNativeType handle, 
         buffer::BufferView* view) 
     {
         Recv::operator()(handle, view->slice_for_producer(), 0);
@@ -127,7 +127,7 @@ public:
     typedef AsyncIOImpl asyncio;
     typedef typename asyncio::EventEngineType EventEngineType;
     typedef typename asyncio::IOHandleType IOHandleType;
-    typedef typename asyncio::IONativeHandleType IONativeHandleType;
+    typedef typename asyncio::IOHandleNativeType IOHandleNativeType;
 
 private:
     IOHandleType _io_handle{-1};
@@ -142,7 +142,7 @@ public:
     StreamSocket() = default;
     ~StreamSocket() override = default;
     explicit StreamSocket(IOHandleType&& io_handle) : _io_handle(std::move(io_handle)) { }
-    explicit StreamSocket(IONativeHandleType native_handle) : _io_handle(native_handle) { }
+    explicit StreamSocket(IOHandleNativeType native_handle) : _io_handle(native_handle) { }
     JINX_NO_COPY_NO_MOVE(StreamSocket);
 
     void initialize(IOHandleType&& io_handle) 

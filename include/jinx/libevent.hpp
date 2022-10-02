@@ -48,10 +48,10 @@ class EventEngineLibevent : public EventEngineAbstract {
     int _additional_flags{0};
 
 public:
-    typedef int IONativeHandleType;
+    typedef int IOHandleNativeType;
     typedef ::jinx::posix::IOHandle IOHandleType;
 
-    constexpr static const IONativeHandleType IONativeHandleInvalidValue = -1;
+    constexpr static const IOHandleNativeType IOHandleNativeInvalidValue = -1;
 
     typedef Optional<EventDataSimple> EventHandleTimer;
     typedef Optional<EventDataSimple> EventHandleSignal;
@@ -88,71 +88,6 @@ public:
         return _base;
     }
 
-    // signal
-
-    JINX_NO_DISCARD
-    ResultGeneric add_signal(EventHandleSignal& signal, int sig, EventCallback, void* arg);
-
-    JINX_NO_DISCARD
-    ResultGeneric remove_signal(EventHandleSignal& signal);
-
-
-    JINX_NO_DISCARD
-    ResultGeneric add_signal(EventHandleSignalFunctional& signal, int sig, std::function<void(const error::Error&)>&&);
-
-    JINX_NO_DISCARD
-    ResultGeneric remove_signal(EventHandleSignalFunctional& signal);
-
-    // timer
-
-    JINX_NO_DISCARD
-    ResultGeneric add_timer(EventHandleTimer& timer, struct timeval* timeval, EventCallback, void* arg);
-
-    JINX_NO_DISCARD
-    ResultGeneric remove_timer(EventHandleTimer& timer);
-
-    // reactor
-    // The IO handle will not be deleted automatically
-    
-
-    JINX_NO_DISCARD
-    ResultGeneric add_reader(EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) {
-        return add_io(IOFlagRead, event_handle, io_handle, callback, arg);
-    }
-
-    JINX_NO_DISCARD
-    ResultGeneric add_writer(EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) {
-        return add_io(IOFlagWrite, event_handle, io_handle, callback, arg);
-    }
-
-    JINX_NO_DISCARD
-    ResultGeneric add_reader_writer(EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) {
-        return add_io(IOTypeReadWrite::Flags, event_handle, io_handle, callback, arg);
-    }
-
-    JINX_NO_DISCARD
-    inline ResultGeneric add_io(const IOTypeRead& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) { 
-        return add_io(IOTypeRead::Flags, event_handle, io_handle, callback, arg); 
-    }
-
-    JINX_NO_DISCARD
-    inline ResultGeneric add_io(const IOTypeWrite& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) {
-        return add_io(IOTypeWrite::Flags, event_handle, io_handle, callback, arg); 
-    }
-
-    JINX_NO_DISCARD
-    inline ResultGeneric add_io(const IOTypeReadWrite& /*unused*/, EventHandleIO& event_handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg) { 
-        return add_io(IOTypeReadWrite::Flags, event_handle, io_handle, callback, arg); 
-    }
-
-
-    JINX_NO_DISCARD
-    ResultGeneric add_io(unsigned int flags, EventHandleIO& handle, IONativeHandleType io_handle, EventCallbackIO callback, void* arg);
-
-
-    JINX_NO_DISCARD
-    ResultGeneric remove_io(EventHandleIO& handle);
-
     // poll
     void poll() override;
 
@@ -166,8 +101,90 @@ public:
 
     static void set_debug(bool enable);
 
+    // reactor
+    // The IO handle will not be deleted automatically
+    JINX_NO_DISCARD
+    static
+    inline ResultGeneric add_io(
+        Awaitable* awaitable,
+        const IOTypeRead& /*unused*/, 
+        EventHandleIO& event_handle, 
+        IOHandleNativeType io_handle, 
+        EventCallbackIO callback, 
+        void* arg) 
+    { 
+        return add_io(awaitable, IOTypeRead::Flags, event_handle, io_handle, callback, arg); 
+    }
+
+    JINX_NO_DISCARD
+    static
+    inline ResultGeneric add_io(
+        Awaitable* awaitable,
+        const IOTypeWrite& /*unused*/,
+        EventHandleIO& event_handle,
+        IOHandleNativeType io_handle,
+        EventCallbackIO callback,
+        void* arg) 
+    {
+        return add_io(awaitable, IOTypeWrite::Flags, event_handle, io_handle, callback, arg); 
+    }
+
+    JINX_NO_DISCARD
+    static
+    inline ResultGeneric add_io(
+        Awaitable* awaitable,
+        const IOTypeReadWrite& /*unused*/,
+        EventHandleIO& event_handle,
+        IOHandleNativeType io_handle,
+        EventCallbackIO callback,
+        void* arg)
+    { 
+        return add_io(awaitable, IOTypeReadWrite::Flags, event_handle, io_handle, callback, arg); 
+    }
+
+    JINX_NO_DISCARD
+    static
+    ResultGeneric add_io(
+        Awaitable* awaitable,
+        unsigned int flags,
+        EventHandleIO& handle,
+        IOHandleNativeType io_handle,
+        EventCallbackIO callback,
+        void* arg);
+
+    JINX_NO_DISCARD
+    static
+    ResultGeneric remove_io(Awaitable* awaitable, EventHandleIO& handle);
+
+    // signal
+
+    JINX_NO_DISCARD
+    static
+    ResultGeneric add_signal(Awaitable* awaitable, EventHandleSignal& signal, int sig, EventCallback, void* arg);
+
+    JINX_NO_DISCARD
+    static
+    ResultGeneric remove_signal(Awaitable* awaitable, EventHandleSignal& signal);
+
+
+    JINX_NO_DISCARD
+    ResultGeneric add_signal(EventHandleSignalFunctional& signal, int sig, std::function<void(const error::Error&)>&&);
+
+    JINX_NO_DISCARD
+    ResultGeneric remove_signal(EventHandleSignalFunctional& signal);
+
+    // timer
+
+    JINX_NO_DISCARD
+    static
+    ResultGeneric add_timer(Awaitable* awaitable, EventHandleTimer& timer, struct timeval* timeval, EventCallback, void* arg);
+
+    JINX_NO_DISCARD
+    static
+    ResultGeneric remove_timer(Awaitable* awaitable, EventHandleTimer& timer);
+
     // posix io
-    inline static IOResult connect(IONativeHandleType io_handle, const struct sockaddr* addr, socklen_t len) noexcept {
+    inline static IOResult connect(IOHandleNativeType io_handle, const struct sockaddr* addr, socklen_t len) noexcept {
         IOResult result;
         int err = 0;
         do {
@@ -184,57 +201,57 @@ public:
         return result;
     }
 
-    inline static IOResult accept(IONativeHandleType io_handle, struct sockaddr* addr, socklen_t* addrlen) noexcept {
+    inline static IOResult accept(IOHandleNativeType io_handle, struct sockaddr* addr, socklen_t* addrlen) noexcept {
         return convert_to_asyncio_error_code(::accept(io_handle, addr, addrlen));
     }
 
-    inline static IOResult read(IONativeHandleType io_handle, SliceMutable& buffer) noexcept {
+    inline static IOResult read(IOHandleNativeType io_handle, SliceMutable& buffer) noexcept {
         return convert_to_asyncio_error_code(::read(io_handle, buffer.data(), buffer.size()));
     }
 
-    inline static IOResult write(IONativeHandleType io_handle, SliceConst& buffer) noexcept {
+    inline static IOResult write(IOHandleNativeType io_handle, SliceConst& buffer) noexcept {
         return convert_to_asyncio_error_code(::write(io_handle, buffer.data(), buffer.size()));
     }
 
-    inline static IOResult recv(IONativeHandleType io_handle, SliceMutable& buffer, int flags) noexcept {
+    inline static IOResult recv(IOHandleNativeType io_handle, SliceMutable& buffer, int flags) noexcept {
         return convert_to_asyncio_error_code(::recv(io_handle, buffer.data(), buffer.size(), flags));
     }
 
-    inline static IOResult send(IONativeHandleType io_handle, SliceConst& buffer, int flags) noexcept {
+    inline static IOResult send(IOHandleNativeType io_handle, SliceConst& buffer, int flags) noexcept {
         return convert_to_asyncio_error_code(::send(io_handle, buffer.data(), buffer.size(), flags));
     }
 
-    inline static IOResult recvfrom(IONativeHandleType io_handle, SliceMutable& buffer, int flags,
+    inline static IOResult recvfrom(IOHandleNativeType io_handle, SliceMutable& buffer, int flags,
         struct sockaddr* address, socklen_t* address_len) 
     {
         return convert_to_asyncio_error_code(::recvfrom(io_handle, buffer.data(), buffer.size(), flags,
             address, address_len));
     }
 
-    inline static IOResult sendto(IONativeHandleType io_handle, SliceConst& buffer, int flags,
+    inline static IOResult sendto(IOHandleNativeType io_handle, SliceConst& buffer, int flags,
         const struct sockaddr* address, socklen_t address_len) noexcept
     {
         return convert_to_asyncio_error_code(::sendto(io_handle, buffer.data(), buffer.size(), flags,
             address, address_len));
     }
 
-    inline static IOResult readv(IONativeHandleType io_handle, SliceMutable* buffers, int count) noexcept {
+    inline static IOResult readv(IOHandleNativeType io_handle, SliceMutable* buffers, int count) noexcept {
         return convert_to_asyncio_error_code(::readv(io_handle, reinterpret_cast<struct iovec*>(buffers), count));
     }
 
-    inline static IOResult writev(IONativeHandleType io_handle, SliceConst* buffers, int count) noexcept {
+    inline static IOResult writev(IOHandleNativeType io_handle, SliceConst* buffers, int count) noexcept {
         return convert_to_asyncio_error_code(::writev(io_handle, reinterpret_cast<struct iovec*>(buffers), count));
     }
     
-    inline static IOResult recvmsg(IONativeHandleType io_handle, struct msghdr* msg, int flags) noexcept {
+    inline static IOResult recvmsg(IOHandleNativeType io_handle, struct msghdr* msg, int flags) noexcept {
         return convert_to_asyncio_error_code(::recvmsg(io_handle, msg, flags));
     }
 
-    inline static IOResult sendmsg(IONativeHandleType io_handle, struct msghdr* msg, int flags) noexcept {
+    inline static IOResult sendmsg(IOHandleNativeType io_handle, struct msghdr* msg, int flags) noexcept {
         return convert_to_asyncio_error_code(::sendmsg(io_handle, msg, flags));
     }
 
-    inline static IOResult shutdown(IONativeHandleType io_handle, int how) noexcept {
+    inline static IOResult shutdown(IOHandleNativeType io_handle, int how) noexcept {
         return convert_to_asyncio_error_code(::shutdown(io_handle, how));
     }
 

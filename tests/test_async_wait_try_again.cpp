@@ -21,7 +21,7 @@ class AsyncTest : public AsyncRoutine {
 
 public:
     AsyncTest& operator ()() {
-        _wait.initialize(std::chrono::milliseconds(1000000), WaitCondition::FirstCompleted);
+        _wait.initialize(WaitCondition::FirstCompleted);
         _wait.branch_create(_sleep1(std::chrono::milliseconds(30)).set_tag(Sleep1)) >> JINX_IGNORE_RESULT;
         _wait.branch_create(_sleep2(std::chrono::milliseconds(10)).set_tag(Sleep2)) >> JINX_IGNORE_RESULT;
 

@@ -29,7 +29,7 @@ struct AsyncImplement {
     typedef EventEngine EventEngineType;
 
     template<typename T>
-    using Wait = jinx::Wait<T, EventEngine>;
+    using Wait = jinx::Wait<T>;
 
     typedef AsyncSleep<EventEngine> Sleep;
 };

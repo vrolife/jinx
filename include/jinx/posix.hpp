@@ -521,10 +521,10 @@ class PosixConnect
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     const struct sockaddr* _address{nullptr};
     socklen_t _len{0};
     bool _connected{false};
@@ -535,13 +535,13 @@ public:
     constexpr static const char* IOTypeName = "connect";
 
     PosixConnect() = default;
-    PosixConnect(IONativeHandleType io_handle, const struct sockaddr* address, socklen_t address_len)
+    PosixConnect(IOHandleNativeType io_handle, const struct sockaddr* address, socklen_t address_len)
     : _io_handle(io_handle),
       _address(address),
       _len(address_len)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixConnect{};
@@ -572,10 +572,10 @@ class PosixAccept
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     struct sockaddr* _address{nullptr};
     socklen_t* _address_len{nullptr};
     bool _connected{false};
@@ -586,13 +586,13 @@ public:
     constexpr static const char* IOTypeName = "accept";
 
     PosixAccept() = default;
-    PosixAccept(IONativeHandleType io_handle, struct sockaddr* address, socklen_t* address_len)
+    PosixAccept(IOHandleNativeType io_handle, struct sockaddr* address, socklen_t* address_len)
     : _io_handle(io_handle),
       _address(address),
       _address_len(address_len)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixAccept{};
@@ -608,10 +608,10 @@ class PosixSendTo
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     SliceConst _buffer{};
     int _flags{0};
     const struct sockaddr* _address{nullptr};
@@ -623,7 +623,7 @@ public:
     constexpr static const char* IOTypeName = "sendto";
 
     PosixSendTo() = default;
-    PosixSendTo(IONativeHandleType io_handle, SliceConst buffer, int flags, const struct sockaddr* address, socklen_t address_len)
+    PosixSendTo(IOHandleNativeType io_handle, SliceConst buffer, int flags, const struct sockaddr* address, socklen_t address_len)
     : _io_handle(io_handle),
       _buffer(buffer),
       _flags(flags),
@@ -631,7 +631,7 @@ public:
       _len(address_len)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixSendTo{};
@@ -647,10 +647,10 @@ class PosixRecvFrom
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     SliceMutable _buffer{};
     int _flags{0};
     AddressChecker<AddressUnspecified> _address{};
@@ -661,21 +661,21 @@ public:
     constexpr static const char* IOTypeName = "recvfrom";
 
     PosixRecvFrom() = default;
-    PosixRecvFrom(IONativeHandleType io_handle, SliceMutable buffer, int flags, struct sockaddr* address, socklen_t* address_len)
+    PosixRecvFrom(IOHandleNativeType io_handle, SliceMutable buffer, int flags, struct sockaddr* address, socklen_t* address_len)
     : _io_handle(io_handle),
       _buffer(buffer),
       _flags(flags),
       _address(address, address_len, *address_len)
     { }
 
-    PosixRecvFrom(IONativeHandleType io_handle, SliceMutable buffer, int flags, SocketAddress& address)
+    PosixRecvFrom(IOHandleNativeType io_handle, SliceMutable buffer, int flags, SocketAddress& address)
     : _io_handle(io_handle),
       _buffer(buffer),
       _flags(flags),
       _address(address.buffer<AddressChecker<AddressUnspecified>>())
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixRecvFrom{};
@@ -695,10 +695,10 @@ class PosixRecv
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     SliceMutable _buffer{};
     int _flags{0};
 
@@ -708,13 +708,13 @@ public:
     constexpr static const char* IOTypeName = "recv";
 
     PosixRecv() = default;
-    PosixRecv(IONativeHandleType io_handle, SliceMutable buffer, int flags)
+    PosixRecv(IOHandleNativeType io_handle, SliceMutable buffer, int flags)
     : _io_handle(io_handle),
       _buffer(buffer),
       _flags(flags)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixRecv{};
@@ -730,10 +730,10 @@ class PosixSend
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     SliceConst _buffer{};
     int _flags{0};
 
@@ -743,13 +743,13 @@ public:
     constexpr static const char* IOTypeName = "send";
 
     PosixSend() = default;
-    PosixSend(IONativeHandleType io_handle, SliceConst buffer, int flags)
+    PosixSend(IOHandleNativeType io_handle, SliceConst buffer, int flags)
     : _io_handle(io_handle),
       _buffer(buffer),
       _flags(flags)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixSend{};
@@ -765,10 +765,10 @@ class PosixRead
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     SliceMutable _buffer{};
 
 public:
@@ -777,12 +777,12 @@ public:
     constexpr static const char* IOTypeName = "read";
 
     PosixRead() = default;
-    PosixRead(IONativeHandleType io_handle, SliceMutable buffer)
+    PosixRead(IOHandleNativeType io_handle, SliceMutable buffer)
     : _io_handle(io_handle),
       _buffer(buffer)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixRead{};
@@ -798,10 +798,10 @@ class PosixWrite
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     SliceConst _buffer{};
 
 public:
@@ -810,12 +810,12 @@ public:
     constexpr static const char* IOTypeName = "write";
 
     PosixWrite() = default;
-    PosixWrite(IONativeHandleType io_handle, SliceConst buffer)
+    PosixWrite(IOHandleNativeType io_handle, SliceConst buffer)
     : _io_handle(io_handle),
       _buffer(buffer)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixWrite{};
@@ -831,10 +831,10 @@ class PosixReadV
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType io_handle{-1};
+    IOHandleNativeType io_handle{-1};
     SliceMutable* _buffers{nullptr};
     int _count{0};
 
@@ -844,7 +844,7 @@ public:
     constexpr static const char* IOTypeName = "readv";
 
     PosixReadV() = default;
-    PosixReadV(IONativeHandleType io_hanlde, SliceMutable* buffers, int count)
+    PosixReadV(IOHandleNativeType io_hanlde, SliceMutable* buffers, int count)
     : io_handle(io_hanlde),
       _buffers(buffers),
       _count(count)
@@ -854,7 +854,7 @@ public:
         static_assert(offsetof(SliceMutable, _size) == offsetof(struct iovec, iov_len), "incompatible buffer type");
     }
 
-    IONativeHandleType native_handle() const { return io_handle; }
+    IOHandleNativeType native_handle() const { return io_handle; }
 
     void reset() noexcept {
         *this = PosixReadV{};
@@ -870,10 +870,10 @@ class PosixWriteV
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     SliceConst* _buffers{};
     int _count{0};
 
@@ -883,7 +883,7 @@ public:
     constexpr static const char* IOTypeName = "writev";
 
     PosixWriteV() = default;
-    PosixWriteV(IONativeHandleType io_handle, SliceConst* buffers, int count)
+    PosixWriteV(IOHandleNativeType io_handle, SliceConst* buffers, int count)
     : _io_handle(io_handle),
       _buffers(buffers),
       _count(count)
@@ -893,7 +893,7 @@ public:
         static_assert(offsetof(SliceConst, _size) == offsetof(struct iovec, iov_len), "incompatible buffer type");
     }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixWriteV{};
@@ -909,10 +909,10 @@ class PosixRecvMsg
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     struct msghdr *_msg{nullptr};
     int _flags{0};
 
@@ -922,13 +922,13 @@ public:
     constexpr static const char* IOTypeName = "recvmsg";
 
     PosixRecvMsg() = default;
-    PosixRecvMsg(IONativeHandleType io_handle, struct msghdr *msg, int flags)
+    PosixRecvMsg(IOHandleNativeType io_handle, struct msghdr *msg, int flags)
     : _io_handle(io_handle),
       _msg(msg),
       _flags(flags)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixRecvMsg{};
@@ -944,10 +944,10 @@ class PosixSendMsg
 {
 public:
     typedef EventEngine EventEngineType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
 private:
-    IONativeHandleType _io_handle{-1};
+    IOHandleNativeType _io_handle{-1};
     struct msghdr *_msg{nullptr};
     int _flags{0};
 
@@ -957,13 +957,13 @@ public:
     constexpr static const char* IOTypeName = "writev";
 
     PosixSendMsg() = default;
-    PosixSendMsg(IONativeHandleType io_handle, struct msghdr *msg, int flags)
+    PosixSendMsg(IOHandleNativeType io_handle, struct msghdr *msg, int flags)
     : _io_handle(io_handle),
       _msg(msg),
       _flags(flags)
     { }
 
-    IONativeHandleType native_handle() const { return _io_handle; }
+    IOHandleNativeType native_handle() const { return _io_handle; }
 
     void reset() noexcept {
         *this = PosixSendMsg{};
@@ -1000,13 +1000,12 @@ public:
         return *this;
     }
 
-    typename IOImpl::IONativeHandleType native_handle() const { return _io_impl.native_handle(); }
+    typename IOImpl::IOHandleNativeType native_handle() const { return _io_impl.native_handle(); }
 
 protected:
     void async_finalize() noexcept override {
         if (not _handle.empty()) {
-            auto* eve = this->template get_event_engine<EventEngineType>();
-            eve->remove_io(_handle) >> JINX_IGNORE_RESULT;
+            EventEngineType::remove_io(this, _handle) >> JINX_IGNORE_RESULT;
             _handle.reset();
         }
         _io_impl.reset();
@@ -1036,9 +1035,8 @@ protected:
         }
         
         if (result._error.category() == category_again()) {
-            auto* eve = this->template get_event_engine<EventEngineType>();
-
-            if (eve->add_io(
+            if (EventEngineType::add_io(
+                    this,
                     typename IOImpl::IOType{}, 
                     _handle, 
                     _io_impl.native_handle(), 
@@ -1065,7 +1063,7 @@ struct AsyncIOPosix
 {
     typedef EventEngine EventEngineType;
     typedef typename EventEngine::IOHandleType IOHandleType;
-    typedef typename EventEngine::IONativeHandleType IONativeHandleType;
+    typedef typename EventEngine::IOHandleNativeType IOHandleNativeType;
 
     using Write = detail::AsyncIOCommon<detail::PosixWrite<EventEngine>>;
     using Read = detail::AsyncIOCommon<detail::PosixRead<EventEngine>>;

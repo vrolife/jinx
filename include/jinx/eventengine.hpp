@@ -21,8 +21,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <jinx/slice.hpp>
 #include <jinx/error.hpp>
+#include <jinx/assert.hpp>
 
 namespace jinx {
+
+class Awaitable;
 
 enum class ErrorEventEngine {
     NoError,
@@ -70,6 +73,19 @@ struct IOResult {
 
 struct EventEngineAbstract
 {
+    EventEngineAbstract() = default;
+    ~EventEngineAbstract() = default;
+    JINX_NO_COPY_NO_MOVE(EventEngineAbstract);
+
+    template<typename T, typename A>
+    static
+    inline
+    T* get_event_engine(A* awaitable) noexcept {
+        auto* event_engine = awaitable->_task->_task_queue->get_event_engine();
+        jinx_assert(event_engine->get_type_tag() == T:: type_tag());
+        return static_cast<T*>(event_engine);
+    }
+
     virtual void wakeup() { }
     virtual void poll() { }
     virtual const void* get_type_tag() = 0;

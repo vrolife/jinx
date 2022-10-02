@@ -25,7 +25,7 @@ class AwaitablePausable : public Awaitable {
     template<typename Base>
     friend class MixinPausable;
     
-    template<typename T, typename EventEngine>
+    template<typename T>
     friend class Wait;
 
     Awaitable* _prev;
@@ -121,7 +121,7 @@ enum WaitCondition {
     FirstException
 };
 
-template<typename T, typename EventEngine>
+template<typename T>
 class Wait : public AwaitablePausable, private TaskQueue
 {
     typedef Awaitable BaseType;
@@ -132,17 +132,14 @@ private:
         Call
     };
 
-    typename EventEngine::EventHandleTimer _timer_handle{};
-
-    struct timeval _timeval{};
     WaitCondition _condition{};
     bool _timeout{false};
     Stage _stage{Stage::Call};
 
     LinkedListThreadSafe<Task> _tasks_done;
 
-    EventEngine* get_event_engine() override {
-        return Awaitable::get_event_engine<EventEngine>();
+    EventEngineAbstract* get_event_engine() override {
+        return _task->_task_queue->get_event_engine();
     }
 
     typedef TaskTagged<T, TaskBound<Task>> Tagged;
@@ -158,24 +155,13 @@ public:
         }
     }
 
-    template<typename Rep, typename Period>
-    void initialize(
-        const std::chrono::duration<Rep, Period>& duration, 
-        WaitCondition condition)
+    void initialize(WaitCondition condition)
     {
-        set_timeout(duration);
         set_condition(condition);
 
         _condition = condition;
         _timeout = false;
         _stage = Stage::Call;
-    }
-
-    template<typename Rep, typename Period>
-    void set_timeout(const std::chrono::duration<Rep, Period>& duration) noexcept {
-        const auto sec = std::chrono::duration_cast<std::chrono::seconds>(duration);
-        _timeval.tv_sec = sec.count();
-        _timeval.tv_usec = std::chrono::duration_cast<std::chrono::microseconds>(duration - sec).count();
     }
 
     void set_condition(WaitCondition cond) noexcept {
