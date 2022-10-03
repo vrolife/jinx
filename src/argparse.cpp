@@ -54,6 +54,7 @@ void Argument::validate(RecordCategory& category) const
         }
         case TypeBool:
         {
+            _get<bool>(category);
             return;
         }
         case TypeStringList:
