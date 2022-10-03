@@ -126,6 +126,17 @@ public:
     }
 
     JINX_NO_DISCARD
+    inline ResultGeneric add_io(
+        const IOTypeRead& /*unused*/, 
+        EventHandleIO& event_handle, 
+        IOHandleNativeType io_handle, 
+        EventCallbackIO callback, 
+        void* arg) 
+    { 
+        return add_io(IOTypeRead::Flags, event_handle, io_handle, callback, arg); 
+    }
+
+    JINX_NO_DISCARD
     static
     inline ResultGeneric add_io(
         Awaitable* awaitable,
@@ -136,6 +147,17 @@ public:
         void* arg) 
     {
         return add_io(awaitable, IOTypeWrite::Flags, event_handle, io_handle, callback, arg); 
+    }
+
+    JINX_NO_DISCARD
+    inline ResultGeneric add_io(
+        const IOTypeWrite& /*unused*/,
+        EventHandleIO& event_handle,
+        IOHandleNativeType io_handle,
+        EventCallbackIO callback,
+        void* arg) 
+    {
+        return add_io(IOTypeWrite::Flags, event_handle, io_handle, callback, arg); 
     }
 
     JINX_NO_DISCARD
@@ -152,6 +174,17 @@ public:
     }
 
     JINX_NO_DISCARD
+    inline ResultGeneric add_io(
+        const IOTypeReadWrite& /*unused*/,
+        EventHandleIO& event_handle,
+        IOHandleNativeType io_handle,
+        EventCallbackIO callback,
+        void* arg)
+    { 
+        return add_io(IOTypeReadWrite::Flags, event_handle, io_handle, callback, arg); 
+    }
+
+    JINX_NO_DISCARD
     static
     ResultGeneric add_io(
         Awaitable* awaitable,
@@ -162,8 +195,19 @@ public:
         void* arg);
 
     JINX_NO_DISCARD
+    ResultGeneric add_io(
+        unsigned int flags,
+        EventHandleIO& handle,
+        IOHandleNativeType io_handle,
+        EventCallbackIO callback,
+        void* arg);
+
+    JINX_NO_DISCARD
     static
     ResultGeneric remove_io(Awaitable* awaitable, EventHandleIO& handle);
+
+    JINX_NO_DISCARD
+    ResultGeneric remove_io(EventHandleIO& handle);
 
     // signal
 
@@ -172,8 +216,14 @@ public:
     ResultGeneric add_signal(Awaitable* awaitable, EventHandleSignal& signal, int sig, EventCallback, void* arg);
 
     JINX_NO_DISCARD
+    ResultGeneric add_signal(EventHandleSignal& signal, int sig, EventCallback, void* arg);
+
+    JINX_NO_DISCARD
     static
     ResultGeneric remove_signal(Awaitable* awaitable, EventHandleSignal& signal);
+
+    JINX_NO_DISCARD
+    ResultGeneric remove_signal(EventHandleSignal& signal);
 
 
     JINX_NO_DISCARD
@@ -189,8 +239,14 @@ public:
     ResultGeneric add_timer(Awaitable* awaitable, EventHandleTimer& timer, struct timeval* timeval, EventCallback, void* arg);
 
     JINX_NO_DISCARD
+    ResultGeneric add_timer(EventHandleTimer& timer, struct timeval* timeval, EventCallback, void* arg);
+
+    JINX_NO_DISCARD
     static
     ResultGeneric remove_timer(Awaitable* awaitable, EventHandleTimer& timer);
+
+    JINX_NO_DISCARD
+    ResultGeneric remove_timer(EventHandleTimer& timer);
 
     // posix io
     inline static IOResult connect(IOHandleNativeType io_handle, const struct sockaddr* addr, socklen_t len) noexcept {

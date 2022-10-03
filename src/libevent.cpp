@@ -161,14 +161,22 @@ ResultGeneric EventEngineLibevent::add_signal(
     void* arg)
 {
     auto* self = get_event_engine<EventEngineLibevent>(awaitable);
+    return self->add_signal(signal, sig, callback, arg);
+}
 
+ResultGeneric EventEngineLibevent::add_signal(
+    EventHandleSignal& signal, 
+    int sig, 
+    EventCallback callback, 
+    void* arg)
+{
     signal.reset();
     signal.emplace(callback, arg);
 
     static_assert(std::is_same<EventHandleTimer, EventHandleSignal>::value, 
         "do not touch this class");
     
-    event_assign(&signal.get()._event, self->_base, sig, 
+    event_assign(&signal.get()._event, _base, sig, 
         EV_SIGNAL, 
         &EventEngineLibevent::EventDataSimple::callback, &signal);
     event_add(&signal.get()._event, nullptr);
@@ -177,6 +185,13 @@ ResultGeneric EventEngineLibevent::add_signal(
 
 ResultGeneric EventEngineLibevent::remove_signal(
     Awaitable* awaitable, 
+    EventHandleSignal& signal) 
+{
+    auto* self = get_event_engine<EventEngineLibevent>(awaitable);
+    return self->remove_signal(signal);
+}
+
+ResultGeneric EventEngineLibevent::remove_signal(
     EventHandleSignal& signal) 
 {
     if (signal.empty()) {
@@ -236,7 +251,15 @@ ResultGeneric EventEngineLibevent::add_timer(
     void* arg)
 {
     auto* self = get_event_engine<EventEngineLibevent>(awaitable);
+    return self->add_timer(timer, timeval, callback, arg);
+}
 
+ResultGeneric EventEngineLibevent::add_timer(
+    EventHandleTimer& timer, 
+    struct timeval* timeval, 
+    EventCallback callback, 
+    void* arg)
+{
     timer.reset();
     timer.emplace(callback, arg);
 
@@ -244,7 +267,7 @@ ResultGeneric EventEngineLibevent::add_timer(
         "do not touch this class");
     event_assign(
         &timer.get()._event, 
-        self->_base, 
+        _base, 
         -1, 
         EV_TIMEOUT, 
         &EventEngineLibevent::EventDataSimple::callback, 
@@ -255,6 +278,13 @@ ResultGeneric EventEngineLibevent::add_timer(
 
 ResultGeneric EventEngineLibevent::remove_timer(
     Awaitable* awaitable, 
+    EventHandleTimer& timer) 
+{
+    auto* self = get_event_engine<EventEngineLibevent>(awaitable);
+    return self->remove_timer(timer);
+}
+
+ResultGeneric EventEngineLibevent::remove_timer(
     EventHandleTimer& timer) 
 {
     if (timer.empty()) {
@@ -278,11 +308,21 @@ ResultGeneric EventEngineLibevent::add_io(
     void* arg)
 {
     auto* self = get_event_engine<EventEngineLibevent>(awaitable);
+    return self->add_io(flags, event_handle, io_handle, callback, arg);
+}
+
+ResultGeneric EventEngineLibevent::add_io(
+    unsigned int flags, 
+    EventHandleIO& event_handle, 
+    IOHandleNativeType io_handle, 
+    EventCallbackIO callback, 
+    void* arg)
+{
     event_handle.reset();
     event_handle.emplace(callback, arg);
     event_assign(
         &event_handle.get()._event, 
-        self->_base, 
+        _base, 
         io_handle, 
         flags,
         &EventEngineLibevent::EventDataIO::callback, 
@@ -293,6 +333,12 @@ ResultGeneric EventEngineLibevent::add_io(
 
 ResultGeneric EventEngineLibevent::remove_io(Awaitable* awaitable, EventHandleIO& handle) // NOLINT
 {
+    auto* self = get_event_engine<EventEngineLibevent>(awaitable);
+    return self->remove_io(handle);
+}
+
+ResultGeneric EventEngineLibevent::remove_io(EventHandleIO& handle) // NOLINT
+{
     if (handle.get()._state == Running) {
         handle.get()._state = Deleted;
     } else {
@@ -300,6 +346,7 @@ ResultGeneric EventEngineLibevent::remove_io(Awaitable* awaitable, EventHandleIO
     }
     return Successful_;
 }
+
 
 #if 0
 error::Error EventEngineLibevent::read(IONativeHandle fd, SliceMutable buffer, IOOption& opt, PreactorCallback callback, void* arg)
