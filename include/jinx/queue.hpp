@@ -197,12 +197,14 @@ public:
     }
 
     void reset() noexcept {
-        for (auto& get : _pending_get) {
-            get.set_error(make_error(ErrorAwaitable::Cancelled));
-        }
-        for (auto& put : _pending_put) {
-            put.set_error(make_error(ErrorAwaitable::Cancelled));
-        }
+        _pending_get.for_each([](Get* get){
+            get->async_resume(make_error(ErrorAwaitable::Cancelled)) >> JINX_IGNORE_RESULT;
+        });
+        
+        _pending_put.for_each([](Put* put){
+            put->async_resume(make_error(ErrorAwaitable::Cancelled)) >> JINX_IGNORE_RESULT;
+        });
+        
         _pending_get.clear();
         _pending_put.clear();
 

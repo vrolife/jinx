@@ -84,6 +84,8 @@ int main(int argc, const char* argv[])
 
     loop.run();
 
+    queue.reset();
+
     std::cout << buf << std::endl;
     jinx_assert(buf == "foo1bar1foo2bar2putget");
     return 0;
