@@ -18,14 +18,6 @@ public:
     Async spawn() {
         auto task = this->task_new<AsyncDoNothing>();
         jinx_assert(async_cancel(task).unwrap() == ErrorCancel::DeferredDequeue);
-
-        _task = this->task_new<AsyncDoNothing>();
-        return async_yield(&AsyncTest::exit);
-    }
-
-    Async exit() {
-        jinx_assert(async_cancel(_task).unwrap() == ErrorCancel::CancelDequeuedTask);
-        _task.reset();
         return this->async_return();
     }
 };
