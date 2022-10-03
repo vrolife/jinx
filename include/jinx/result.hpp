@@ -121,6 +121,12 @@ public:
             error::fatal(message);
         }
     }
+
+    void abort_except(const Type& other, const char* message) {
+        if (is_not(other)) {
+            error::fatal(message);
+        }
+    }
 };
 
 typedef Result<bool> ResultBool;
