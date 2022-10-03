@@ -83,9 +83,7 @@ if(NOT JINX_NO_INSTALL)
 install(TARGETS jinx ARCHIVE PUBLIC_HEADER DESTINATION include/jinx)
 endif(NOT JINX_NO_INSTALL)
 
-if(NOT JINX_NO_TESTS)
-    add_subdirectory(tests)
-endif(NOT JINX_NO_TESTS)
+add_subdirectory(tests)
 
 if(NOT JINX_NO_LIBS)
     add_subdirectory(libs)
