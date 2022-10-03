@@ -93,9 +93,7 @@ public:
     QueueBase() = default;
     JINX_NO_COPY_NO_MOVE(QueueBase);
     ~QueueBase() {
-        while(size()) {
-            pop();
-        }
+        reset();
     }
 
     size_t size() const {
@@ -120,10 +118,6 @@ public:
 
     template<typename...Args>
     void emplace(Args&&... args) {
-        if (full()) {
-            return;
-        }
-
         if (_end == &reinterpret_cast<T*>(_memory)[N]) {
             _end = reinterpret_cast<T*>(_memory);
         }
@@ -135,10 +129,6 @@ public:
     }
 
     void pop() {
-        if (empty()) {
-            return;
-        }
-
         reinterpret_cast<T*>(_begin)->~T();
 
         -- _size;
@@ -182,13 +172,15 @@ private:
     LinkedList<Get> _pending_get{};
     LinkedList<Put> _pending_put{};
 
+protected:
+    using BaseType::emplace;
+    using BaseType::pop;
+    using BaseType::front;
+
 public:
     using BaseType::QueueBase;
     using BaseType::empty;
     using BaseType::full;
-    using BaseType::front;
-    using BaseType::emplace;
-    using BaseType::pop;
     using BaseType::get_max_size;
     using BaseType::set_max_size;
 
@@ -320,22 +312,21 @@ public:
             Flush queue
             TODO limit loop ?
         */
-        while (not _queue->_pending_get.empty()) 
+        if (not _queue->_pending_get.empty()) 
         {
+            jinx_assert(_queue->empty());
+
             auto* get = _queue->_pending_get.back();
             _queue->_pending_get.pop_back() >> JINX_IGNORE_RESULT;
-            if (_queue->empty()) {
-                get->emplace_result(std::move(_value.get()));
-                this->emplace_result();
-                return async_return();
-            }
-            get->emplace_result(_queue->front());
-            _queue->pop();
+        
+            get->emplace_result(std::move(_value.get())) >> JINX_IGNORE_RESULT;
+            this->emplace_result() >> JINX_IGNORE_RESULT;;
+            return async_return();
         }
         
         if (_queue->full()) {
             if (static_cast<bool>(_queue->_pending_put.push_back(this).is(Failed_))) {
-                return async_throw(ErrorQueue::PendingPutError);;
+                return async_throw(ErrorQueue::PendingPutError);
             }
             return this->async_suspend();
 

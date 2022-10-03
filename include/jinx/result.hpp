@@ -117,13 +117,13 @@ public:
     }    
 
     void abort_on(const Type& other, const char* message) {
-        if (is(other)) {
+        if (JINX_UNLIKELY(is(other))) {
             error::fatal(message);
         }
     }
 
     void abort_except(const Type& other, const char* message) {
-        if (is_not(other)) {
+        if (JINX_UNLIKELY(is_not(other))) {
             error::fatal(message);
         }
     }

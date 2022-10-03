@@ -16,23 +16,23 @@ public:
     AsyncTest1& operator ()(Queue<std::queue<int>>* queue)
     {
         _queue = queue;
-        async_start(&AsyncTest1::foo);
+        async_start(&AsyncTest1::put1);
         return *this;
     }
 
-    Async foo() {
-        buf.append("foo1");
-        return async_await(_put(_queue, 1), &AsyncTest1::bar);
+    Async put1() {
+        buf.append("put1");
+        return async_await(_put(_queue, 1), &AsyncTest1::put2);
     }
 
-    Async bar() {
-        buf.append("bar1");
-        return async_await(_put(_queue, 1), &AsyncTest1::get);
+    Async put2() {
+        buf.append("put2");
+        return async_await(_put(_queue, 1), &AsyncTest1::put3);
     }
 
-    Async get() {
-        buf.append("get");
-        return async_await(_get(_queue), &AsyncTest1::finish);
+    Async put3() {
+        buf.append("put3");
+        return async_await(_put(_queue, 1), &AsyncTest1::finish);
     }
 
     Async finish() {
@@ -48,23 +48,23 @@ public:
     AsyncTest2& operator ()(Queue<std::queue<int>>* queue)
     {
         _queue = queue;
-        async_start(&AsyncTest2::foo);
+        async_start(&AsyncTest2::get1);
         return *this;
     }
 
-    Async foo() {
-        buf.append("foo2");
-        return async_await(_get(_queue), &AsyncTest2::bar);
+    Async get1() {
+        buf.append("get1");
+        return async_await(_get(_queue), &AsyncTest2::get2);
     }
 
-    Async bar() {
-        buf.append("bar2");
-        return async_await(_get(_queue), &AsyncTest2::put);
+    Async get2() {
+        buf.append("get2");
+        return async_await(_get(_queue), &AsyncTest2::get3);
     }
 
-    Async put() {
-        buf.append("put");
-        return async_await(_put(_queue, 1), &AsyncTest2::finish);
+    Async get3() {
+        buf.append("get3");
+        return async_await(_get(_queue), &AsyncTest2::finish);
     }
 
     Async finish() {
@@ -87,6 +87,6 @@ int main(int argc, const char* argv[])
     queue.reset();
 
     std::cout << buf << std::endl;
-    jinx_assert(buf == "foo1bar1foo2bar2putget");
+    jinx_assert(buf == "put1put2get1get2get3put3");
     return 0;
 }
