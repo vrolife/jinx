@@ -373,7 +373,7 @@ struct TLSImplOpenSSLRead
         if (result._int == 0) {
             result._error = make_error(ErrorCodeOpenSSL::EndOfStream);
         } else if (result._int > 0) {
-            _buffer->commit(result._int).abort_on(buffer::BufferViewStatus::OutOfRange, "commit out of range");
+            _buffer->commit(result._int).abort_on(Failed_, "commit out of range");
         } else {
             result._error = convert_to_streamtls_error_code(
                 SSL_get_error(_connection, result._int));
@@ -400,7 +400,7 @@ struct TLSImplOpenSSLWrite
         const auto buf = _buffer->slice_for_consumer();
         result._int = SSL_write(_connection, buf.data(), buf.size());
         if (result._int > 0) {
-            _buffer->consume(result._size).abort_on(buffer::BufferViewStatus::OutOfRange, "commit out of range");
+            _buffer->consume(result._size).abort_on(Failed_, "commit out of range");
             // write all
             if (_buffer->size() > 0) {
                 return  io();

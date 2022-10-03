@@ -214,7 +214,7 @@ protected:
                 return std::streambuf::traits_type::eof();
             }
             *dst.begin() = static_cast<char>(cha);
-            if (JINX_UNLIKELY(_buffer->commit(1).is(buffer::BufferViewStatus::OutOfRange))) {
+            if (JINX_UNLIKELY(_buffer->commit(1).is(Failed_))) {
                 error::fatal("HTTPBuilder memory overflow");
             }
             return cha;
@@ -230,7 +230,7 @@ protected:
 
         memcpy(dst.begin(), str, size);
 
-        if (JINX_UNLIKELY(_buffer->commit(size).is(buffer::BufferViewStatus::OutOfRange))) {
+        if (JINX_UNLIKELY(_buffer->commit(size).is(Failed_))) {
             error::fatal("HTTPBuilder memory overflow");
         }
 
@@ -579,7 +579,7 @@ protected:
         }
 
         auto start_line_length = end - _buffer->begin(); // include CRLF
-        if (JINX_UNLIKELY(_buffer->consume(start_line_length).is(buffer::BufferViewStatus::OutOfRange))) {
+        if (JINX_UNLIKELY(_buffer->consume(start_line_length).is(Failed_))) {
             error::fatal("HTTP parser memory overflow");
         }
         
@@ -608,7 +608,7 @@ protected:
 
         if (JINX_UNLIKELY(begin_of_field_name[0] == '\r' and begin_of_field_name[1] == '\n')) {
             // end of header
-            if (JINX_UNLIKELY(_buffer->consume(2).is(buffer::BufferViewStatus::OutOfRange))) {
+            if (JINX_UNLIKELY(_buffer->consume(2).is(Failed_))) {
                 error::fatal("HTTP parser memory overflow");
             }
 
@@ -688,7 +688,7 @@ protected:
         }      
 
         auto header_length = end - _buffer->begin();
-        if (JINX_UNLIKELY(_buffer->consume(header_length).is(buffer::BufferViewStatus::OutOfRange))) {
+        if (JINX_UNLIKELY(_buffer->consume(header_length).is(Failed_))) {
             error::fatal("HTTP parser memory overflow");
         }
         

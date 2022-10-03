@@ -58,19 +58,17 @@ protected:
     Async async_poll() override {
         auto state = Send::async_poll();
         if (state == ControlState::Ready) {
-            switch(_view->consume(Send::get_result()).unwrap()) {
-                case buffer::BufferViewStatus::Completed:
-                    if (_view->size() > 0) {
+            if(_view->consume(Send::get_result()).is(Successful_)) {
+                if (_view->size() > 0) {
 #if __linux__
-                        const int SendFlags = MSG_NOSIGNAL;
+                    const int SendFlags = MSG_NOSIGNAL;
 #else
-                        const int SendFlags = 0;
+                    const int SendFlags = 0;
 #endif
-                        Send::operator()(this->native_handle(), _view->slice_for_consumer(), SendFlags);
-                        return this->async_poll();
-                    }
-                    break;
-                case buffer::BufferViewStatus::OutOfRange:
+                    Send::operator()(this->native_handle(), _view->slice_for_consumer(), SendFlags);
+                    return this->async_poll();
+                }
+            } else {
                     error::fatal("stream buffer out of range");
             }
         }
@@ -109,11 +107,8 @@ protected:
                 return this->async_throw(ErrorStream::EndOfStream);
             }
 
-            switch(_view->commit(size).unwrap()) {
-                case buffer::BufferViewStatus::Completed:
-                    break;
-                case buffer::BufferViewStatus::OutOfRange:
-                    error::fatal("stream buffer out of range");
+            if(_view->commit(size).is(Failed_)) {
+                error::fatal("stream buffer out of range");
             }
         }
         return state;

@@ -73,11 +73,6 @@ struct SumPendingRequestCount {
     
 } // namespace detail
 
-enum class BufferViewStatus {
-    Completed,
-    OutOfRange
-};
-
 enum class ErrorBuffer {
     NoError,
     OutOfMemory
@@ -159,21 +154,21 @@ public:
     char* end() const noexcept { return &_memory[_end]; }
 
     JINX_NO_DISCARD
-    Result<BufferViewStatus> commit(size_t n) noexcept {
+    ResultGeneric commit(size_t n) noexcept {
         if (JINX_UNLIKELY(n > capacity())) {
-            return BufferViewStatus::OutOfRange;
+            return Failed_;
         }
         _end += n;
-        return BufferViewStatus::Completed;
+        return Successful_;
     }
 
     JINX_NO_DISCARD
-    Result<BufferViewStatus> consume(size_t n) noexcept {
+    ResultGeneric consume(size_t n) noexcept {
         if (JINX_UNLIKELY(n > size())) {
-            return BufferViewStatus::OutOfRange;
+            return Failed_;
         }
         _begin += n;
-        return BufferViewStatus::Completed;
+        return Successful_;
     }
 
     SliceConst slice_for_consumer() const noexcept {

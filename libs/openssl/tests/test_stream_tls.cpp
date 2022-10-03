@@ -167,7 +167,7 @@ protected:
         auto buf = _view.slice_for_producer();
         jinx_assert(buf.size() >= 5);
         memcpy(buf.begin(), "hello", 5);
-        jinx_assert(_view.commit(5).unwrap() == BufferViewStatus::Completed);
+        jinx_assert(_view.commit(5).is(Successful_));
 
         _read_view = {_read_buffer, 100, 0, 0};
         memset(_read_buffer, 0, 100);
