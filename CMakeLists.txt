@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13)
 project(jinx C CXX)
 
 include(CTest)
-include(cmake/scan_tests.cmake)
+include(cmake/scan_test.cmake)
 
 option(JINX_BUILD_HTTP "build jinx::http" ON)
 option(JINX_BUILD_CJSON "build jinx::cjson" ON)

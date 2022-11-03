@@ -1,2 +1,3 @@
-
-jinx_scan_tests(LIBRARIES jinx::cjson)
+if (NOT JINX_NO_TESTS)
+    jinx_scan_test(LIBRARIES jinx::cjson)
+endif (NOT JINX_NO_TESTS)
