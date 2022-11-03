@@ -150,7 +150,7 @@ public:
     ~Task() override = default;
 
     const error::Error& get_error_code() const noexcept { return _error; }
-    inline void set_error_code(const error::Error& error) noexcept {
+    inline void set_error(const error::Error& error) noexcept {
         _error = error;
     }
 
@@ -358,7 +358,7 @@ protected:
     virtual EventEngineAbstract* get_event_engine() = 0;
 
     JINX_NO_DISCARD
-    virtual ResultGeneric schedule(Task* task) {
+    virtual ResultGeneric schedule(Task* task, const error::Error& error) {
         auto state = task->_state.exchange(ControlState::Ready);
         if (state == ControlState::Ready) {
             return Failed_;
@@ -368,6 +368,8 @@ protected:
             task->_state = ControlState::Exited;
             return Failed_;
         }
+
+        task->set_error(error);
 
         _tasks_ready.push(task);
         return Successful_;
@@ -433,7 +435,7 @@ protected:
                     if (next == nullptr) {
                         continue;
                     }
-                    schedule(task) >> JINX_IGNORE_RESULT;
+                    schedule(task, {}) >> JINX_IGNORE_RESULT;
                     task = next;
                     continue;
                 }
@@ -480,7 +482,7 @@ public:
 
         auto state = task->_state.exchange(ControlState::Ready);
         if (state == ControlState::Ready) {
-            task->set_error_code({});
+            task->set_error({});
             /*
                 Task was inserted into _ready_tasks queue. 
                 There is no safe way to pop it from _ready_tasks queue.
@@ -501,7 +503,7 @@ public:
         if (push(task).is(Failed_)) {
             return Failed_;
         }
-        return schedule(task);
+        return schedule(task, {});
     }
 };
 
@@ -515,8 +517,8 @@ public:
     explicit Loop(EventEngineAbstract* event_engine) : _event_engine(event_engine) { }
     
     JINX_NO_DISCARD
-    ResultGeneric schedule(Task *task) override {
-        if (TaskQueue::schedule(task).is(Failed_)) {
+    ResultGeneric schedule(Task *task, const error::Error& error) override {
+        if (TaskQueue::schedule(task, error).is(Failed_)) {
             return Failed_;
         }
         _event_engine->wakeup();

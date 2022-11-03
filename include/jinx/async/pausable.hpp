@@ -214,8 +214,8 @@ public:
 
 protected:
     JINX_NO_DISCARD
-    ResultGeneric schedule(Task *task) override {
-        if (TaskQueue::schedule(task).is(Failed_)) {
+    ResultGeneric schedule(Task *task, const error::Error& error) override {
+        if (TaskQueue::schedule(task, error).is(Failed_)) {
             return Failed_;
         }
         return this->async_resume();

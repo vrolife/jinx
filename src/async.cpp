@@ -83,16 +83,14 @@ try {
     return Async {state};
 }
 
-
 ResultGeneric Task::resume(const error::Error& error) noexcept {
     if (_task_queue == nullptr) {
         return Failed_;
     }
 
-    if (_task_queue->schedule(this).is(Failed_)) {
+    if (_task_queue->schedule(this, error).is(Failed_)) {
         return Failed_;
     }
-    set_error_code(error);
     return Successful_;
 }
 
