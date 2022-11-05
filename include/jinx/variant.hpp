@@ -76,24 +76,6 @@ struct __variant_stub_free {
     }
 };
 
-struct __variant_stub_assign_copy {
-    typedef void(*Signature)(void*, const void*);
-    template<typename T>
-    inline
-    static void apply(void* mem, const void* other) {
-        *reinterpret_cast<T*>(mem) = *reinterpret_cast<const T*>(other);
-    }
-};
-
-struct __variant_stub_assign_move {
-    typedef void(*Signature)(void*, void*);
-    template<typename T>
-    inline
-    static void apply(void* mem, void* other) {
-        *reinterpret_cast<T*>(mem) = std::move(*reinterpret_cast<T*>(other));
-    }
-};
-
 struct __variant_stub_construct_copy {
     typedef void(*Signature)(void*, const void*);
     template<typename T>
@@ -212,23 +194,6 @@ class VariantRecursive : public VariantBase<Types...>
     typename std::enable_if<sizeof...(TS) == 0>::
     type _construct_copy(const VariantRecursive& other) { }
 
-    template<typename T, typename... TS>
-    inline
-    void _assign_copy(const VariantRecursive& other) {
-        auto type = meta::index_of<T, Types...>::value;
-        if (JINX_UNLIKELY(type == other._type)) {
-            *reinterpret_cast<T*>(this->_memory) = *reinterpret_cast<const T*>(other._memory);
-            this->_type = other._type;
-            return;
-        }
-        return _assign_copy<TS...>(other);
-    }
-
-    template<typename... TS>
-    inline
-    typename std::enable_if<sizeof...(TS) == 0>::
-    type _assign_copy(const VariantRecursive& other) { }
-
     // move
     template<typename T, typename... TS>
     inline
@@ -247,24 +212,6 @@ class VariantRecursive : public VariantBase<Types...>
     inline
     typename std::enable_if<sizeof...(TS) == 0>::
     type _construct_move(VariantRecursive&& other) { }
-
-    template<typename T, typename... TS>
-    inline
-    void _assign_move(VariantRecursive&& other) {
-        auto type = meta::index_of<T, Types...>::value;
-        if (JINX_UNLIKELY(type == other._type)) {
-            *reinterpret_cast<T*>(this->_memory) = std::move(*reinterpret_cast<const T*>(other._memory));
-            this->_type = other._type;
-            other._type = -1;
-            return;
-        }
-        return _assign_move<TS...>(std::move(other));
-    }
-
-    template<typename... TS>
-    inline
-    typename std::enable_if<sizeof...(TS) == 0>::
-    type _assign_move(VariantRecursive&& other) { }
 
     // compare
     template<typename T, typename... TS>
@@ -330,7 +277,7 @@ public:
     VariantRecursive& operator =(const VariantRecursive& other) {
         reset();
         if (not other.empty()) {
-            _assign_copy<Types...>(other);
+            _construct_copy<Types...>(other);
         }
         return *this;
     }
@@ -338,7 +285,7 @@ public:
     VariantRecursive& operator =(VariantRecursive&& other)  noexcept {
         reset();
         if (not other.empty()) {
-            _assign_move<Types...>(std::move(other));
+            _construct_move<Types...>(std::move(other));
         }
         return *this;
     }
@@ -416,7 +363,7 @@ public:
         reset();
         if (not other.empty()) {
             this->_type = other._type;
-            detail::__lookup_table_apply<detail::__variant_stub_assign_copy, Types...>(this->_type)(this->_memory, other._memory);
+            detail::__lookup_table_apply<detail::__variant_stub_construct_copy, Types...>(this->_type)(this->_memory, other._memory);
         }
         return *this;
     }
@@ -425,7 +372,7 @@ public:
        reset();
         if (not other.empty()) {
             this->_type = other._type;
-            detail::__lookup_table_apply<detail::__variant_stub_assign_move, Types...>(this->_type)(this->_memory, other._memory);
+            detail::__lookup_table_apply<detail::__variant_stub_construct_move, Types...>(this->_type)(this->_memory, other._memory);
             other._type = -1;
         }
         return *this;
@@ -476,13 +423,17 @@ public:
 #define __JINX_VARIANT_SWITCH 5
 #endif
 
-#ifdef JINX_USE_VARIANT_LOOKUP_TABLE
+#if defined(JINX_USE_VARIANT_LOOKUP_TABLE) && JINX_USE_VARIANT_LOOKUP_TABLE
 
 template<typename... TypeList>
 using Variant = VariantLookupTable<TypeList...>;
 
-#else
+#elif defined(JINX_USE_VARIANT_RECURSIVE) && PLAYLANG_USE_VARIANT_RECURSIVE
 
+template<typename... TypeList>
+using Variant = VariantRecursive<TypeList...>;
+
+#else
 
 template<typename... TypeList>
 using Variant = typename std::conditional<
