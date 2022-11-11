@@ -16,9 +16,13 @@ function(_add_jinx_test)
 endfunction(_add_jinx_test)
 
 function(jinx_scan_test)
-    cmake_parse_arguments(TEST "" "" "SOURCES;LIBRARIES" ${ARGN})
+    cmake_parse_arguments(TEST "" "PATTERN" "SOURCES;LIBRARIES" ${ARGN})
 
-    file(GLOB_RECURSE SOURCE_FILE_LIST LIST_DIRECTORIES false RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/ test_*.cpp)
+    if (NOT TEST_PATTERN)
+        set(TEST_PATTERN "test_*.cpp")
+    endif()
+
+    file(GLOB_RECURSE SOURCE_FILE_LIST LIST_DIRECTORIES false RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/ "${TEST_PATTERN}")
 
     foreach(SOURCE_FILE ${SOURCE_FILE_LIST})
         if (JINX_TEST_WHITE_LIST)
