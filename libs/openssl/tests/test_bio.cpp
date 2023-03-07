@@ -1,3 +1,5 @@
+#include <array>
+
 #include <jinx/libevent.hpp>
 #include <jinx/async.hpp>
 #include <jinx/openssl/openssl.hpp>
